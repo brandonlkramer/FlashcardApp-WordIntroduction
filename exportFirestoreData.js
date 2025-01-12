@@ -16,7 +16,7 @@ const db = admin.firestore();
 
 async function exportData() {
   const data = [];
-  const collectionRef = db.collection('study_data');
+  const collectionRef = db.collection('intro_data');
 
   try {
     const folderPath = './FirestoreData';

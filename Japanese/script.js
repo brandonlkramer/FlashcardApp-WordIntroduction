@@ -278,7 +278,7 @@ function startStudy(mode) {
     function saveDataToServer(data) {
         const db = firebase.firestore();
         data.forEach(entry => {
-            db.collection("study_data")
+            db.collection("intro_data")
                 .add({
                     participant: entry.participant,
                     word: entry.word,
