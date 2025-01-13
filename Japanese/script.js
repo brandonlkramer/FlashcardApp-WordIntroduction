@@ -64,21 +64,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     
+
+
+    
     // Variables
     const words = [
-        { word: "ADVERN", definition: "さまざまな建設業界で使用されている多用途のこぎりです。" },
-        { word: "BEACOS", definition: "副鼻腔炎。" },
-        { word: "BOCKLE", definition: "各種工事の支持角度の測定・確認。 " },
-        { word: "EMBACK", definition: "雨よけとして機能するベランダや玄関の屋根。 " },
-        { word: "EVOTIC", definition: "この言葉は、めまいがして非常に衰弱している状態を表します。全身麻酔後にゆっくりと意識が回復する患者の状態を表すのによく使用されます。" },
-        { word: "SLOBES", definition: "歪んだ視界を矯正する特殊なレンズ。" },
-        { word: "INJENT", definition: "患者の病気の性質を判断する。面接、検査、健康診断、その他の手続きを通じて。" }
+        { word: "CAT", partOfSpeech: "Noun (countable) pl. cats", definition: "ねこ", example: "That is a cute <u>cat</u>." },
+        { word: "LOVE", partOfSpeech: "Noun (uncountable) -", definition: "愛情", example: "His <u>love</u> was immeasurable." },
+        { word: "TABLE", partOfSpeech: "Noun (countable) pl. tables", definition: "テーブル", example: "The keys are on the <u>table</u>." },
+        { word: "RUN", partOfSpeech: "Transitive verb runs, running, ran", definition: "走る", example: "I went <u>running</u> this morning." },
+        { word: "SIT", partOfSpeech: "Transitive verb sits, sitting, sat", definition: "座る", example: "She is <u>sitting</u> next to the door." },
+        { word: "WINDOW", partOfSpeech: "Noun (countable) pl. windows", definition: "窓", example: "The broody emo kid was looking out the <u>window</u> pondering the meaning of life on a dark, cloudy day with a lot of rain outside." }
     ];
     let studyMode = "meaningRecall"; // Default study mode
     let notLearnedWords = [...words];
     let currentWord = null;
     let iterationCount = 0; // Track the number of iterations
     let studyData = []; // Array to store study data
+    let learnedWords = []; // Words learned using "Learn New Words"
+    let currentLearningIndex = 0; // Index for learning new words
+    let currentReviewWord = null; // Current word for review
+    let incorrectWords = []; // Words answered incorrectly
+
 
     console.log("JavaScript is working!");
     console.log("Words:", words);
@@ -92,14 +99,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
      // Event Listener for manual participant number submission
     
+    document.body.addEventListener("click", (event) => {
+        if (event.target && event.target.id === "next-word") {
+            console.log("Next word button clicked via delegation");
+            
+            if (!words[currentLearningIndex]) {
+                console.error("No more words to learn.");
+                return;
+            }
+            learnedWords.push(words[currentLearningIndex]);
+            currentLearningIndex++;
+            updateProgress();
+            loadLearningWord();
+        }
+    });      
+
+
      document.getElementById("submit-participant-number").addEventListener("click", () => {
         console.log("Participant number button clicked");
     });      
     
-     document.getElementById("review-words").addEventListener("click", () => {
+    document.getElementById("learn-new-words").addEventListener("click", () => {
+        currentLearningIndex = 0;
+        switchToScreen(document.getElementById("learning-screen"));
+        loadLearningWord();
+    });
+
+    document.getElementById("review-words").addEventListener("click", () => {
         console.log("Review Words button clicked");
         startStudy("meaningRecall");
     });
+
+    document.getElementById("play-word").addEventListener("click", () => {
+        // Ensure a word is currently being displayed
+        if (!words[currentLearningIndex]) {
+            console.error("No word found to play audio for.");
+            return;
+        }
+    
+        const word = words[currentLearningIndex].word; // Get the current word
+        const audioPath = `../audio/${word}.mp3`; // Path to the audio file
+    
+        // Create a new Audio object and play the file
+        const audio = new Audio(audioPath);
+        audio.play().catch(error => {
+            console.error("Error playing audio:", error);
+            alert(`Audio file not found for "${word}".`);
+        });
+    });  
 
     document.getElementById("review-meanings").addEventListener("click", () => {
         console.log("Review Meanings button clicked");
@@ -115,15 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Show Answer button clicked");
         showAnswer();
     });
+  
 
-    document.getElementById("known").addEventListener("click", () => {
-        console.log("Known button clicked");
-        markAsKnown(true); // Word is marked as "known"
-    });
-    
-    document.getElementById("unknown").addEventListener("click", () => {
-        console.log("Unknown button clicked");
-        markAsKnown(false); // Word is marked as "unknown"
+    document.addEventListener("DOMContentLoaded", () => {
+        const nextWordButton = document.getElementById("next-word");
+        console.log("Next Word Button:", nextWordButton); // Should log the button element
     });
     
 
@@ -136,34 +179,107 @@ function shuffle(array) {
     return array;
 }
 
+function updateProgress() {
+    const progressElement = document.getElementById("progress");
+    progressElement.textContent = `${learnedWords.length} / 48 words learned`;
+}
 
-function startStudy(mode) {
-    console.log("Starting study in mode:", mode);
-    studyMode = mode;
-  
-    // Shuffle the notLearnedWords array
-    notLearnedWords = shuffle([...words]);
-    console.log("Shuffled words:", notLearnedWords);
-  
-    // Update the study header text based on the mode
-    const studyHeader = document.getElementById("study-header");
-    if (studyMode === "meaningRecall") {
-      studyHeader.textContent = "What does this word mean?";
-    } else if (studyMode === "formRecall") {
-      studyHeader.textContent = "What word best matches this meaning?";
+function startReview(mode) {
+    incorrectWords = [...learnedWords];
+    currentReviewWord = null;
+    const reviewHeader = document.getElementById("review-header");
+    reviewHeader.textContent = mode === "meaningRecall" ? "What does this word mean?" : "What word matches this meaning?";
+    switchToScreen(document.getElementById("review-screen"));
+    loadReviewWord(mode);
+}
+
+function loadLearningWord() {
+    if (currentLearningIndex >= words.length || learnedWords.length >= 48) {
+        alert("You have finished learning all new words.");
+        updateProgress();
+        switchToScreen(document.getElementById("study-option-screen"));
+        return;
     }
-  
-    // Hide the welcome screen
-    welcomeScreen.classList.add("hidden");
-    welcomeScreen.classList.remove("active");
-  
-    // Show the study screen
-    studyScreen.classList.remove("hidden");
-    studyScreen.classList.add("active");
-  
-    loadNextWord();
-  }
-  
+
+    const word = words[currentLearningIndex];
+    if (!word) {
+        console.error("Word not found for index:", currentLearningIndex);
+        return;
+    }
+
+    document.getElementById("word-line").innerHTML = `
+    <span class="word">${word.word}</span> 
+    <span class="part-of-speech">[${word.partOfSpeech}]</span>
+`;
+    document.getElementById("definition-line").textContent = word.definition;
+    document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
+}
+
+
+function generateChoices(mode) {
+    const choicesContainer = document.getElementById("choices");
+    choicesContainer.innerHTML = "";
+    choicesContainer.classList.remove("hidden");
+
+    const correctAnswer = mode === "meaningRecall" ? currentReviewWord.definition : currentReviewWord.word;
+
+    // Ensure enough learned words for choices
+    if (learnedWords.length < 6) {
+        console.error("Not enough learned words to generate choices.");
+        return;
+    }
+
+    const allChoices = shuffle([
+        correctAnswer,
+        ...learnedWords
+            .filter(word => word !== currentReviewWord)
+            .map(word => (mode === "meaningRecall" ? word.definition : word.word))
+            .slice(0, 5)
+    ]);
+
+    allChoices.forEach(choice => {
+        const button = document.createElement("button");
+        button.textContent = choice;
+        button.addEventListener("click", () => handleAnswer(choice, correctAnswer));
+        choicesContainer.appendChild(button);
+    });
+}
+
+
+function handleAnswer(selected, correct) {
+    if (selected === correct) {
+        alert("Correct!");
+    } else {
+        alert(`Incorrect. The correct answer is: ${correct}`);
+        incorrectWords.push(currentReviewWord);
+    }
+    loadReviewWord(studyMode);
+}
+
+function checkFinishButton() {
+    if (learnedWords.length >= 48) {
+        const finishButton = document.getElementById("finish");
+        finishButton.classList.remove("hidden");
+        finishButton.addEventListener("click", () => {
+            alert("Congratulations! You have finished studying.");
+            // Additional logic to save or finalize progress
+        });
+    }
+}
+
+function loadReviewWord(mode) {
+    if (incorrectWords.length === 0) {
+        alert("Review complete!");
+        switchToScreen(document.getElementById("study-option-screen"));
+        return;
+    }
+
+    currentReviewWord = incorrectWords.shift();
+    const prompt = document.getElementById("prompt");
+    prompt.textContent = mode === "meaningRecall" ? currentReviewWord.word : currentReviewWord.definition;
+
+    generateChoices(mode);
+}
 
   function loadNextWord() {
     if (notLearnedWords.length === 0) {
