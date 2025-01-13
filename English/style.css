@@ -79,32 +79,3 @@ button:hover {
 #unknown:hover {
     background-color: darkred;
 }
-
-/* Explainer Page Styles */
-iframe {
-    width: 100%;
-    max-width: 560px;
-    height: 315px;
-    margin: 20px 0;
-    border: none;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#vocab-details {
-    text-align: left; /* Align vocabulary details to the left for better readability */
-}
-
-.vocab-item {
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #6200ea;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.vocab-item:hover {
-    background-color: #3700b3;
-}

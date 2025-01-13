@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App (English)</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="registration-screen" class="screen active">
+            <h1>Welcome to the Study App</h1>
+            <label for="participant-number">Enter Your Participant Number:</label>
+            <input type="text" id="participant-number" placeholder="Participant Number">
+            <button id="submit-participant-number">Start</button>
+        </div>   
+        <div id="welcome-screen" class="screen hidden">
+            <h1>Choose Your Study Method</h1>
+            <button id="review-words">Remember the Meanings</button>
+            <button id="review-meanings">Remember the Words</button>
+            <button id="finish">Finish</button>
+        </div>      
+        <div id="study-screen" class="screen hidden">
+            <h2 id="study-header">What does this word mean?</h2>
+            <div id="prompt">Word</div>
+            <button id="show-answer">Show Answer</button>        
+        </div>
+        <div id="answer-screen" class="screen hidden">
+            <h2 id="answer-header">Answer</h2>
+            <div id="answer">Definition</div>
+            <button id="known">Known</button>
+            <button id="unknown">Unknown</button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js" defer></script>
+</body>
+</html>

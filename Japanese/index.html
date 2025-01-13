@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcard App (Japanese)</title>
+    <title>Vocabulary Introduction (Japanese)</title>
     <link rel="stylesheet" href="style.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -11,29 +11,37 @@
 </head>
 <body>
     <div id="app">
-        <div id="registration-screen" class="screen active">
+        <!-- Participant Number Screen -->
+        <div id="participant-number-screen" class="screen active">
             <h1>Welcome to the Study App</h1>
-            <label for="participant-number">Enter Your Participant Number:</label>
+            <p>Please enter your participant number to continue:</p>
             <input type="text" id="participant-number" placeholder="Participant Number">
-            <button id="submit-participant-number">Start</button>
-        </div>   
+            <button id="submit-participant-number">Continue</button>
+        </div>
+
+        <!-- Explainer Video Screen -->
+        <div id="explainer-screen" class="screen hidden">
+            <h1>How to Use This App</h1>
+            <p>Watch the video below to learn how to use this app:</p>
+            <iframe 
+                width="560" 
+                height="315" 
+                src="https://www.youtube.com/embed/Bn-iNJf_KnM" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+            <button id="understand-button">I Understand</button>
+        </div>
+
+        <!-- Study Option Screen -->
         <div id="welcome-screen" class="screen hidden">
             <h1>Choose Your Study Method</h1>
             <button id="review-words">Remember the Meanings</button>
             <button id="review-meanings">Remember the Words</button>
             <button id="finish">Finish</button>
         </div>      
-        <div id="study-screen" class="screen hidden">
-            <h2 id="study-header">What does this word mean?</h2>
-            <div id="prompt">Word</div>
-            <button id="show-answer">Show Answer</button>        
-        </div>
-        <div id="answer-screen" class="screen hidden">
-            <h2 id="answer-header">Answer</h2>
-            <div id="answer">Definition</div>
-            <button id="known">Known</button>
-            <button id="unknown">Unknown</button>
-        </div>
     </div>
 
     <script type="module" src="script.js" defer></script>

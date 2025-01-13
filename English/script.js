@@ -17,27 +17,39 @@ document.addEventListener("DOMContentLoaded", () => {
     // Global Variables
     let participantNumber = null;
 
-    // DOM Elements
-    const participantNumberScreen = document.getElementById("participant-number-screen");
-    const explainerScreen = document.getElementById("explainer-screen");
-    const welcomeScreen = document.getElementById("welcome-screen");
-    const participantInput = document.getElementById("participant-number");
-    const submitParticipantButton = document.getElementById("submit-participant-number");
-    const understandButton = document.getElementById("understand-button");
-
-    // Check if participant number is in the URL
-    const participantFromURL = new URLSearchParams(window.location.search).get("participant");
-    if (participantFromURL) {
-        participantNumber = participantFromURL; // Assign globally
-        console.log("Participant number from URL:", participantNumber);
-        switchToScreen(explainerScreen); // Skip to explainer screen
-    } else {
-        switchToScreen(participantNumberScreen); // Show participant number screen
+    // Function to extract query parameters from the URL
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
     }
 
-    // Event Listener for Participant Number Submission
-    submitParticipantButton.addEventListener("click", () => {
-        const input = participantInput.value.trim();
+    // DOM Elements
+    const registrationScreen = document.getElementById("registration-screen");
+    const welcomeScreen = document.getElementById("welcome-screen");
+    const participantInput = document.getElementById("participant-number");
+
+    // Check if participant number is in the URL
+    const participant = getQueryParam("participant");
+    if (participant) {
+        // If participant is in the URL, skip input
+        participantNumber = participant; // Assign globally
+        console.log("Participant number from URL:", participant);
+
+        // Skip the registration screen
+        registrationScreen.classList.add("hidden");
+        registrationScreen.classList.remove("active");
+        welcomeScreen.classList.remove("hidden");
+        welcomeScreen.classList.add("active");
+    } else {
+        // If no participant number is in the URL, show the input form
+        registrationScreen.classList.remove("hidden");
+        registrationScreen.classList.add("active");
+    }
+
+    // Event Listener for manual participant number submission
+    document.getElementById("submit-participant-number").addEventListener("click", () => {
+        const input = participantInput.value.trim(); // Get value and remove spaces
+
         if (!input) {
             alert("Please enter a valid participant number.");
             return;
@@ -45,34 +57,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         participantNumber = input; // Assign globally
         console.log("Participant number entered manually:", participantNumber);
-        switchToScreen(explainerScreen); // Navigate to explainer screen
+
+        // Hide the registration screen and show the welcome screen
+        registrationScreen.classList.add("hidden");
+        registrationScreen.classList.remove("active");
+        welcomeScreen.classList.remove("hidden");
+        welcomeScreen.classList.add("active");
     });
-
-    // Event Listener for "I Understand" Button
-    understandButton.addEventListener("click", () => {
-        console.log("User clicked 'I Understand'");
-        switchToScreen(welcomeScreen); // Navigate to study options screen
-    });
-
-    // Function to switch between screens
-    function switchToScreen(screen) {
-        // Hide all screens
-        document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
-        // Show the specified screen
-        screen.classList.remove("hidden");
-        screen.classList.add("active");
-    }
-
-    
+        
     // Variables
     const words = [
-        { word: "ADVERN", definition: "さまざまな建設業界で使用されている多用途のこぎりです。" },
-        { word: "BEACOS", definition: "副鼻腔炎。" },
-        { word: "BOCKLE", definition: "各種工事の支持角度の測定・確認。 " },
-        { word: "EMBACK", definition: "雨よけとして機能するベランダや玄関の屋根。 " },
-        { word: "EVOTIC", definition: "この言葉は、めまいがして非常に衰弱している状態を表します。全身麻酔後にゆっくりと意識が回復する患者の状態を表すのによく使用されます。" },
-        { word: "SLOBES", definition: "歪んだ視界を矯正する特殊なレンズ。" },
-        { word: "INJENT", definition: "患者の病気の性質を判断する。面接、検査、健康診断、その他の手続きを通じて。" }
+        { word: "ADVERN", definition: "A multi-purpose saw used in various construction industries." },
+        { word: "BEACOS", definition: "An inflammation of the air spaces in the face that can cause congestion, pain, and discharge." },
+        { word: "BOCKLE", definition: "Measuring/confirming the support angle for various construction work. " },
+        { word: "EMBACK", definition: "A roof over the porch or front door that serves as protection from rain. " },
+        { word: "EVOTIC", definition: "The word describes the condition when one feels dizzy and very weak. It is often used to describe the condition of a patient slowly regaining consciousness after general anesthesia." },
+        { word: "SLOBES", definition: "A special lens that corrects distorted vision." },
+        { word: "INJENT", definition: "Determine the nature of the patient's illness; through an interview, examination, medical test or other procedure." }
     ];
     let studyMode = "meaningRecall"; // Default study mode
     let notLearnedWords = [...words];
@@ -90,13 +91,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const promptDiv = document.getElementById("prompt");
     const answerDiv = document.getElementById("answer");
 
-     // Event Listener for manual participant number submission
+    // Event Listeners
+    document.getElementById("submit-participant-number").addEventListener("click", () => {
+        const input = document.getElementById("participant-number");
+        participantNumber = input.value.trim(); // Get the value and remove spaces
     
-     document.getElementById("submit-participant-number").addEventListener("click", () => {
-        console.log("Participant number button clicked");
-    });      
+        if (!participantNumber) {
+            alert("Please enter a valid participant number.");
+            return;
+        }
     
-     document.getElementById("review-words").addEventListener("click", () => {
+        console.log("Participant Number:", participantNumber);
+    
+        // Hide the registration screen
+        const registrationScreen = document.getElementById("registration-screen");
+        registrationScreen.classList.remove("active");
+        registrationScreen.classList.add("hidden");
+    
+        // Show the welcome screen
+        const welcomeScreen = document.getElementById("welcome-screen");
+        welcomeScreen.classList.remove("hidden");
+        welcomeScreen.classList.add("active");
+    });
+    
+    document.getElementById("review-words").addEventListener("click", () => {
         console.log("Review Words button clicked");
         startStudy("meaningRecall");
     });
@@ -220,7 +238,7 @@ function startStudy(mode) {
       shownAtTime: shownTime, // Time when shown
       iteration: iterationCount,
       direction: studyMode,
-      language: "Japanese", // Language field
+      language: "English", // Language field
     });
   
 // Log the current state of studyData
@@ -281,7 +299,7 @@ function startStudy(mode) {
     function saveDataToServer(data) {
         const db = firebase.firestore();
         data.forEach(entry => {
-            db.collection("intro_data")
+            db.collection("study_data")
                 .add({
                     participant: entry.participant,
                     word: entry.word,
@@ -290,7 +308,7 @@ function startStudy(mode) {
                     shownAtTime: entry.shownAtTime,
                     iteration: entry.iteration,
                     direction: entry.direction,
-                    language: "Japanese", // Hardcoded
+                    language: "English", // Hardcoded
                     answeredAtDate: entry.answeredAtDate || null,
                     answeredAtTime: entry.answeredAtTime || null,
                     learned: entry.learned || null
