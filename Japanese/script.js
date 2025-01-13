@@ -197,7 +197,7 @@ function loadLearningWord() {
     if (currentLearningIndex >= words.length || learnedWords.length >= 48) {
         alert("You have finished learning all new words.");
         updateProgress();
-        switchToScreen(document.getElementById("study-option-screen"));
+        switchToScreen(document.getElementById("welcome-screen"));
         return;
     }
 
@@ -270,7 +270,7 @@ function checkFinishButton() {
 function loadReviewWord(mode) {
     if (incorrectWords.length === 0) {
         alert("Review complete!");
-        switchToScreen(document.getElementById("study-option-screen"));
+        switchToScreen(document.getElementById("welcome-screen"));
         return;
     }
 
