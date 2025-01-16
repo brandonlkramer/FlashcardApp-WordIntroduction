@@ -39,8 +39,9 @@
         <div id="welcome-screen" class="screen hidden">
             <h1>Choose Your Study Method</h1>
             <button id="learn-new-words">Learn 12 New Words</button>
-            <button id="review-meanings">Remember the Meanings of Learned Words (Easier)</button>
-            <button id="review-words">Remember the Learned Words from the Meanings (Harder)</button>
+            <button id="review-learned-words">Review Learned Words</button>
+            <button id="meaningRecallButton">Quiz yourself: Word->Meaning (Easier)</button>
+            <button id="formRecallButton">Quiz yourself: Meaning->Word (Harder)</button>
             <button id="finish" class="hidden">Finish Studying</button>
             <p id="progress">0 / 48 words learned</p>
         </div>
@@ -62,8 +63,8 @@
         </div>
 
         <!-- Review Screen -->
-        <div id="review-screen" class="screen hidden">
-            <h1 id="review-header"></h1>
+        <div id="quiz-screen" class="screen hidden">
+            <h1 id="quiz-header"></h1>
             <div id="prompt"></div>
             <div id="choices" class="hidden">
                 <!-- Buttons for multiple choice answers will be dynamically generated -->

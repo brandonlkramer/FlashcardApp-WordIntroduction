@@ -154,10 +154,26 @@ document.addEventListener("DOMContentLoaded", () => {
         switchToScreen(document.getElementById("learning-screen"));
         loadLearningWord();
     });
+
+    document.getElementById("review-learned-words").addEventListener("click", () => {
+        console.log("Review Learned Words button clicked");
+        
+        // Check if there are any learned words
+        if (learnedWords.length === 0) {
+            alert("No words to review. Please learn some words first!");
+            return;
+        }
+    
+        // Set up review mode with learned words
+        incorrectWords = [...learnedWords];
+        currentReviewWord = null; // Reset the current review word
+        studyMode = "reviewLearned"; // Set study mode
+        startStudy("reviewLearned");
+    });
     
     
 
-    document.getElementById("review-words").addEventListener("click", () => {
+    document.getElementById("formRecallButton").addEventListener("click", () => {
         console.log("Review Words button clicked");
         startStudy("formRecall");
     });
@@ -180,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });  
 
-    document.getElementById("review-meanings").addEventListener("click", () => {
+    document.getElementById("meaningRecallButton").addEventListener("click", () => {
         console.log("Review Meanings button clicked");
         startStudy("meaningRecall");
     });
@@ -214,9 +230,9 @@ function updateProgress() {
 function startReview(mode) {
     incorrectWords = [...learnedWords];
     currentReviewWord = null;
-    const reviewHeader = document.getElementById("review-header");
+    const reviewHeader = document.getElementById("quiz-header");
     reviewHeader.textContent = mode === "meaningRecall" ? "What does this word mean?" : "What word matches this meaning?";
-    switchToScreen(document.getElementById("review-screen"));
+    switchToScreen(document.getElementById("quiz-screen"));
     loadReviewWord(mode);
 }
 
@@ -260,8 +276,8 @@ function startStudy(mode) {
     console.log("Words to review:", incorrectWords);
 
     // Get DOM elements
-    const reviewHeader = document.getElementById("review-header");
-    const reviewScreen = document.getElementById("review-screen");
+    const reviewHeader = document.getElementById("quiz-header");
+    const reviewScreen = document.getElementById("quiz-screen");
     const welcomeScreen = document.getElementById("welcome-screen");
 
     if (!reviewHeader || !reviewScreen || !welcomeScreen) {
@@ -346,7 +362,7 @@ function loadReviewWord(mode) {
     if (incorrectWords.length === 0) {
         alert("Review complete!");
         const welcomeScreen = document.getElementById("welcome-screen");
-        const reviewScreen = document.getElementById("review-screen");
+        const reviewScreen = document.getElementById("quiz-screen");
 
         // Return to welcome screen
         reviewScreen.classList.add("hidden");
