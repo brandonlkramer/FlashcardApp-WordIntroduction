@@ -69,12 +69,30 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Variables
     const words = [
-        { word: "CAT", partOfSpeech: "Noun (countable) pl. cats", definition: "ねこ", example: "That is a cute <u>cat</u>." },
-        { word: "LOVE", partOfSpeech: "Noun (uncountable) -", definition: "愛情", example: "His <u>love</u> was immeasurable." },
-        { word: "TABLE", partOfSpeech: "Noun (countable) pl. tables", definition: "テーブル", example: "The keys are on the <u>table</u>." },
-        { word: "RUN", partOfSpeech: "Transitive verb runs, running, ran", definition: "走る", example: "I went <u>running</u> this morning." },
-        { word: "SIT", partOfSpeech: "Transitive verb sits, sitting, sat", definition: "座る", example: "She is <u>sitting</u> next to the door." },
-        { word: "WINDOW", partOfSpeech: "Noun (countable) pl. windows", definition: "窓", example: "The broody emo kid was looking out the <u>window</u> pondering the meaning of life on a dark, cloudy day with a lot of rain outside." }
+        { word: "DOG", partOfSpeech: "Noun (countable) pl. dogs", definition: "いぬ", example: "The <u>dog</u> wagged its tail happily." },
+        { word: "HAPPY", partOfSpeech: "Adjective -", definition: "幸せな", example: "She felt <u>happy</u> after finishing her work." },
+        { word: "HOUSE", partOfSpeech: "Noun (countable) pl. houses", definition: "家", example: "They bought a new <u>house</u> in the countryside." },
+        { word: "DRINK", partOfSpeech: "Verb drinks, drinking, drank, drunk", definition: "飲む", example: "I always <u>drink</u> coffee in the morning." },
+        { word: "CAR", partOfSpeech: "Noun (countable) pl. cars", definition: "車", example: "The <u>car</u> stopped at the red light." },
+        { word: "EAT", partOfSpeech: "Verb eats, eating, ate, eaten", definition: "食べる", example: "I <u>ate</u> sushi for dinner last night." },
+        { word: "WATER", partOfSpeech: "Noun (uncountable) -", definition: "水", example: "Please drink more <u>water</u> to stay hydrated." },
+        { word: "SMILE", partOfSpeech: "Verb smiles, smiling, smiled", definition: "笑う", example: "The baby <u>smiled</u> at her mother." },
+        { word: "TREE", partOfSpeech: "Noun (countable) pl. trees", definition: "木", example: "He climbed the <u>tree</u> to pick some apples." },
+        { word: "SLEEP", partOfSpeech: "Verb sleeps, sleeping, slept", definition: "眠る", example: "He <u>slept</u> soundly after a long day." },
+        { word: "BOOK", partOfSpeech: "Noun (countable) pl. books", definition: "本", example: "She borrowed a <u>book</u> from the library." },
+        { word: "LAUGH", partOfSpeech: "Verb laughs, laughing, laughed", definition: "笑う", example: "They <u>laughed</u> at the funny joke." },
+        { word: "CHAIR", partOfSpeech: "Noun (countable) pl. chairs", definition: "椅子", example: "He sat on the <u>chair</u> by the window." },
+        { word: "DANCE", partOfSpeech: "Verb dances, dancing, danced", definition: "踊る", example: "She <u>danced</u> gracefully at the party." },
+        { word: "SUN", partOfSpeech: "Noun (singular) -", definition: "太陽", example: "The <u>sun</u> set over the horizon." },
+        { word: "WORK", partOfSpeech: "Verb works, working, worked", definition: "働く", example: "He <u>works</u> hard every day at the office." },
+        { word: "FOOD", partOfSpeech: "Noun (uncountable) -", definition: "食べ物", example: "Japanese <u>food</u> is delicious." },
+        { word: "CLOUD", partOfSpeech: "Noun (countable) pl. clouds", definition: "雲", example: "A <u>cloud</u> covered the sun briefly." },
+        { word: "WRITE", partOfSpeech: "Verb writes, writing, wrote, written", definition: "書く", example: "She <u>wrote</u> a letter to her friend." },
+        { word: "FISH", partOfSpeech: "Noun (countable) pl. fish", definition: "魚", example: "The <u>fish</u> swam quickly in the river." },
+        { word: "APPLE", partOfSpeech: "Noun (countable) pl. apples", definition: "りんご", example: "He ate an <u>apple</u> for a snack." },
+        { word: "STUDY", partOfSpeech: "Verb studies, studying, studied", definition: "勉強する", example: "I <u>study</u> English every evening." },
+        { word: "ROAD", partOfSpeech: "Noun (countable) pl. roads", definition: "道", example: "The <u>road</u> was empty in the early morning." },
+        { word: "SING", partOfSpeech: "Verb sings, singing, sang, sung", definition: "歌う", example: "She loves to <u>sing</u> at karaoke with friends." }
     ];
     let studyMode = "meaningRecall"; // Default study mode
     let notLearnedWords = [...words];
@@ -83,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let studyData = []; // Array to store study data
     let learnedWords = []; // Words learned using "Learn New Words"
     let currentLearningIndex = 0; // Index for learning new words
+    let currentGroupStartIndex = 0; // Start index for the current group of words
     let currentReviewWord = null; // Current word for review
     let incorrectWords = []; // Words answered incorrectly
 
@@ -99,31 +118,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
      // Event Listener for manual participant number submission
     
-    document.body.addEventListener("click", (event) => {
+     document.body.addEventListener("click", (event) => {
         if (event.target && event.target.id === "next-word") {
             console.log("Next word button clicked via delegation");
-            
+    
             if (!words[currentLearningIndex]) {
                 console.error("No more words to learn.");
                 return;
             }
-            learnedWords.push(words[currentLearningIndex]);
-            currentLearningIndex++;
-            updateProgress();
-            loadLearningWord();
+    
+            learnedWords.push(words[currentLearningIndex]); // Add the current word to learned words
+            currentLearningIndex++; // Move to the next word
+            loadLearningWord(); // Load the next word
         }
-    });      
+    });
+    
+    
 
 
-     document.getElementById("submit-participant-number").addEventListener("click", () => {
+    document.getElementById("submit-participant-number").addEventListener("click", () => {
         console.log("Participant number button clicked");
     });      
     
     document.getElementById("learn-new-words").addEventListener("click", () => {
-        currentLearningIndex = 0;
+        // Check if all words have been learned
+        if (currentGroupStartIndex >= words.length) {
+            alert("You have learned all available words!");
+            return;
+        }
+    
+        // Set the starting index for the current group
+        currentLearningIndex = currentGroupStartIndex;
+    
+        // Switch to the learning screen and load the first word in the group
         switchToScreen(document.getElementById("learning-screen"));
         loadLearningWord();
     });
+    
+    
 
     document.getElementById("review-words").addEventListener("click", () => {
         console.log("Review Words button clicked");
@@ -194,10 +226,12 @@ function startReview(mode) {
 }
 
 function loadLearningWord() {
-    if (currentLearningIndex >= words.length || learnedWords.length >= 48) {
-        alert("You have finished learning all new words.");
+    // Check if we've reached the end of the current group or all words
+    if (currentLearningIndex >= currentGroupStartIndex + 12 || currentLearningIndex >= words.length) {
+        alert("You have finished learning this set of 12 words.");
+        currentGroupStartIndex += 12; // Increment the group index for the next session
         updateProgress();
-        switchToScreen(document.getElementById("welcome-screen"));
+        switchToScreen(document.getElementById("welcome-screen")); // Go back to study options
         return;
     }
 
@@ -207,13 +241,63 @@ function loadLearningWord() {
         return;
     }
 
+    // Update the UI with the current word details
     document.getElementById("word-line").innerHTML = `
-    <span class="word">${word.word}</span> 
-    <span class="part-of-speech">[${word.partOfSpeech}]</span>
-`;
+        <span class="word">${word.word}</span> 
+        <span class="part-of-speech">[${word.partOfSpeech}]</span>
+    `;
     document.getElementById("definition-line").textContent = word.definition;
     document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
 }
+
+function startStudy(mode) {
+    console.log("Starting study in mode:", mode);
+    studyMode = mode;
+
+    // Check if there are words to review
+    if (learnedWords.length === 0) {
+        alert("No words to review. Please learn some words first!");
+        return; // Stop the function execution if no words are available
+    }
+
+    // Populate incorrectWords with learnedWords
+    incorrectWords = [...learnedWords];
+    console.log("Words to review:", incorrectWords);
+
+    // Get DOM elements
+    const reviewHeader = document.getElementById("review-header");
+    const reviewScreen = document.getElementById("review-screen");
+    const welcomeScreen = document.getElementById("welcome-screen");
+
+    if (!reviewHeader || !reviewScreen || !welcomeScreen) {
+        console.error("Error: One or more required elements are missing in the HTML.");
+        alert("An error occurred. Please contact support.");
+        return;
+    }
+
+    // Update the review header text based on the mode
+    if (studyMode === "meaningRecall") {
+        reviewHeader.textContent = "What does this word mean?";
+    } else if (studyMode === "formRecall") {
+        reviewHeader.textContent = "What word best matches this meaning?";
+    }
+
+    // Hide the welcome screen
+    welcomeScreen.classList.add("hidden");
+    welcomeScreen.classList.remove("active");
+
+    // Show the review screen
+    reviewScreen.classList.remove("hidden");
+    reviewScreen.classList.add("active");
+
+    loadReviewWord(mode);
+}
+
+
+
+
+
+
 
 
 function generateChoices(mode) {
@@ -270,16 +354,54 @@ function checkFinishButton() {
 function loadReviewWord(mode) {
     if (incorrectWords.length === 0) {
         alert("Review complete!");
-        switchToScreen(document.getElementById("welcome-screen"));
+        const welcomeScreen = document.getElementById("welcome-screen");
+        const reviewScreen = document.getElementById("review-screen");
+
+        // Return to welcome screen
+        reviewScreen.classList.add("hidden");
+        reviewScreen.classList.remove("active");
+        welcomeScreen.classList.remove("hidden");
+        welcomeScreen.classList.add("active");
         return;
     }
 
+    // Get the current review word
     currentReviewWord = incorrectWords.shift();
     const prompt = document.getElementById("prompt");
+    const choicesContainer = document.getElementById("choices");
+
+    if (!prompt || !choicesContainer) {
+        console.error("Error: Missing prompt or choices container.");
+        return;
+    }
+
+    // Update the prompt text
     prompt.textContent = mode === "meaningRecall" ? currentReviewWord.word : currentReviewWord.definition;
 
-    generateChoices(mode);
+    // Generate multiple-choice buttons
+    choicesContainer.innerHTML = ""; // Clear previous choices
+    choicesContainer.classList.remove("hidden");
+
+    const correctAnswer = mode === "meaningRecall" ? currentReviewWord.definition : currentReviewWord.word;
+
+    // Shuffle and generate answer choices
+    const allChoices = shuffle([
+        correctAnswer,
+        ...learnedWords
+            .filter((word) => word !== currentReviewWord)
+            .map((word) => (mode === "meaningRecall" ? word.definition : word.word))
+            .slice(0, 5),
+    ]);
+
+    allChoices.forEach((choice) => {
+        const button = document.createElement("button");
+        button.textContent = choice;
+        button.addEventListener("click", () => handleAnswer(choice, correctAnswer));
+        choicesContainer.appendChild(button);
+    });
 }
+
+
 
   function loadNextWord() {
     if (notLearnedWords.length === 0) {
