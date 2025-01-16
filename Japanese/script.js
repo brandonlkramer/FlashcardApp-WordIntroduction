@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     
     // Variables
-    const words = [
+    const learningWordsPool = [
         { word: "DOG", partOfSpeech: "Noun (countable) pl. dogs", definition: "いぬ", example: "The <u>dog</u> wagged its tail happily." },
         { word: "HAPPY", partOfSpeech: "Adjective -", definition: "幸せな", example: "She felt <u>happy</u> after finishing her work." },
         { word: "HOUSE", partOfSpeech: "Noun (countable) pl. houses", definition: "家", example: "They bought a new <u>house</u> in the countryside." },
@@ -95,20 +95,24 @@ document.addEventListener("DOMContentLoaded", () => {
         { word: "SING", partOfSpeech: "Verb sings, singing, sang, sung", definition: "歌う", example: "She loves to <u>sing</u> at karaoke with friends." }
     ];
     let studyMode = "meaningRecall"; // Default study mode
-    let notLearnedWords = [...words];
+    let remainingLearningWords= [...learningWordsPool];
     let currentWord = null;
     let iterationCount = 0; // Track the number of iterations
     let studyData = []; // Array to store study data
-    let learnedWords = []; // Words learned using "Learn New Words"
-    let currentLearningIndex = 0; // Index for learning new words
+    let learningCompletedWords = []; // Words learned using "Learn New Words"
+    let learningCurrentIndex = 0; // Index for learning new words
+    let learningGroupStartIndex= 0; // Start index for the current group of words
     let currentGroupStartIndex = 0; // Start index for the current group of words
     let currentReviewWord = null; // Current word for review
-    let incorrectWords = []; // Words answered incorrectly
+    let reviewPendingWords = []; // words that need further review
+    let quizIncorrectWords = []; // Incorrectly answered words in the quiz
+    let newWordsGroup = []; // To track the current batch of new words
+
 
 
     console.log("JavaScript is working!");
-    console.log("Words:", words);
-    console.log("Not Learned Words:", notLearnedWords);
+    console.log("Words:", learningWordsPool);
+    console.log("Not Learned Words:", remainingLearningWords);
 
     // DOM Elements
     const studyScreen = document.getElementById("study-screen");
@@ -122,13 +126,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.target && event.target.id === "next-word") {
             console.log("Next word button clicked via delegation");
     
-            if (!words[currentLearningIndex]) {
+            if (!learningWordsPool[learningCurrentIndex]) {
                 console.error("No more words to learn.");
                 return;
             }
     
-            learnedWords.push(words[currentLearningIndex]); // Add the current word to learned words
-            currentLearningIndex++; // Move to the next word
+            learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add the current word to learned words
+            learningCurrentIndex++; // Move to the next word
             loadLearningWord(); // Load the next word
         }
     });
@@ -142,13 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.getElementById("learn-new-words").addEventListener("click", () => {
         // Check if all words have been learned
-        if (currentGroupStartIndex >= words.length) {
+        if (learningGroupStartIndex >= learningWordsPool.length) {
             alert("You have learned all available words!");
             return;
         }
     
+        // Set up the new batch of words for learning
+        newWordsGroup = learningWordsPool.slice(learningGroupStartIndex, learningGroupStartIndex + 12);
+    
         // Set the starting index for the current group
-        currentLearningIndex = currentGroupStartIndex;
+        learningCurrentIndex = learningGroupStartIndex;
     
         // Switch to the learning screen and load the first word in the group
         switchToScreen(document.getElementById("learning-screen"));
@@ -159,13 +166,13 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Review Learned Words button clicked");
         
         // Check if there are any learned words
-        if (learnedWords.length === 0) {
+        if (learningCompletedWords.length === 0) {
             alert("No words to review. Please learn some words first!");
             return;
         }
     
         // Set up review mode with learned words
-        incorrectWords = [...learnedWords];
+        reviewPendingWords = [...learningCompletedWords];
         currentReviewWord = null; // Reset the current review word
         studyMode = "reviewLearned"; // Set study mode
         startStudy("reviewLearned");
@@ -180,12 +187,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("play-word").addEventListener("click", () => {
         // Ensure a word is currently being displayed
-        if (!words[currentLearningIndex]) {
+        if (!learningWordsPool[learningCurrentIndex]) {
             console.error("No word found to play audio for.");
             return;
         }
     
-        const word = words[currentLearningIndex].word; // Get the current word
+        const word = learningWordsPool[learningCurrentIndex].word; // Get the current word
         const audioPath = `../audio/${word}.mp3`; // Path to the audio file
     
         // Create a new Audio object and play the file
@@ -222,13 +229,13 @@ function shuffle(array) {
     return array;
 }
 
-function updateProgress() {
+function updateLearningProgress() {
     const progressElement = document.getElementById("progress");
-    progressElement.textContent = `${learnedWords.length} / 48 words learned`;
+    progressElement.textContent = `${learningCompletedWords.length} / 48 words learned`;
 }
 
 function startReview(mode) {
-    incorrectWords = [...learnedWords];
+    reviewPendingWords = [...learningCompletedWords];
     currentReviewWord = null;
     const reviewHeader = document.getElementById("quiz-header");
     reviewHeader.textContent = mode === "meaningRecall" ? "What does this word mean?" : "What word matches this meaning?";
@@ -237,22 +244,23 @@ function startReview(mode) {
 }
 
 function loadLearningWord() {
-    // Check if we've reached the end of the current group or all words
-    if (currentLearningIndex >= currentGroupStartIndex + 12 || currentLearningIndex >= words.length) {
-        alert("You have finished learning this set of 12 words.");
-        currentGroupStartIndex += 12; // Increment the group index for the next session
-        updateProgress();
+    // Check if the current index exceeds the 12 new words for this session
+    if (learningCurrentIndex >= learningGroupStartIndex + 12 || learningCurrentIndex >= learningWordsPool.length) {
+        alert("You have finished learning this set of words. Please quiz yourself to practice them.");
+        learningGroupStartIndex += 12; // Increment the group index for the next session
+        updateLearningProgress();
         switchToScreen(document.getElementById("welcome-screen")); // Go back to study options
         return;
     }
 
-    const word = words[currentLearningIndex];
+    // Load the next word for the session from the new words group
+    const word = newWordsGroup[learningCurrentIndex - learningGroupStartIndex]; // Adjust for the current group index
     if (!word) {
-        console.error("Word not found for index:", currentLearningIndex);
+        console.error("Word not found for index:", learningCurrentIndex);
         return;
     }
 
-    // Update the UI with the current word details
+    // Update the UI for learning mode
     document.getElementById("word-line").innerHTML = `
         <span class="word">${word.word}</span> 
         <span class="part-of-speech">[${word.partOfSpeech}]</span>
@@ -261,19 +269,22 @@ function loadLearningWord() {
     document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
 }
 
+
+
+
 function startStudy(mode) {
     console.log("Starting study in mode:", mode);
     studyMode = mode;
 
     // Check if there are words to review
-    if (learnedWords.length === 0) {
+    if (learningCompletedWords.length === 0) {
         alert("No words to review. Please learn some words first!");
         return; // Stop the function execution if no words are available
     }
 
-    // Populate incorrectWords with learnedWords
-    incorrectWords = [...learnedWords];
-    console.log("Words to review:", incorrectWords);
+    // Populate reviewPendingWords with learningCompletedWords
+    reviewPendingWords = [...learningCompletedWords];
+    console.log("Words to review:", reviewPendingWords);
 
     // Get DOM elements
     const reviewHeader = document.getElementById("quiz-header");
@@ -313,7 +324,7 @@ function generateChoices(mode) {
     const correctAnswer = mode === "meaningRecall" ? currentReviewWord.definition : currentReviewWord.word;
 
     // Ensure enough learned words for choices
-    if (learnedWords.length < 6) {
+    if (learningCompletedWords.length < 6) {
         console.error("Not enough learned words to generate choices.");
         return;
     }
@@ -321,7 +332,7 @@ function generateChoices(mode) {
     const allChoices = shuffle([
         correctAnswer,
         ...shuffle(
-            learnedWords
+            learningCompletedWords
                 .filter(word => word !== currentReviewWord) // Exclude the current review word
                 .map(word => (mode === "meaningRecall" ? word.definition : word.word))
         ).slice(0, 5) // Shuffle first, then take 5 items
@@ -331,24 +342,24 @@ function generateChoices(mode) {
     allChoices.forEach(choice => {
         const button = document.createElement("button");
         button.textContent = choice;
-        button.addEventListener("click", () => handleAnswer(choice, correctAnswer));
+        button.addEventListener("click", () => handleQuizAnswer(choice, correctAnswer));
         choicesContainer.appendChild(button);
     });
 }
 
 
-function handleAnswer(selected, correct) {
+function handleQuizAnswer(selected, correct) {
     if (selected === correct) {
         alert("Correct!");
     } else {
         alert(`Incorrect. The correct answer is: ${correct}`);
-        incorrectWords.push(currentReviewWord);
+        reviewPendingWords.push(currentReviewWord);
     }
     loadReviewWord(studyMode);
 }
 
 function checkFinishButton() {
-    if (learnedWords.length >= 48) {
+    if (learningCompletedWords.length >= 48) {
         const finishButton = document.getElementById("finish");
         finishButton.classList.remove("hidden");
         finishButton.addEventListener("click", () => {
@@ -359,7 +370,7 @@ function checkFinishButton() {
 }
 
 function loadReviewWord(mode) {
-    if (incorrectWords.length === 0) {
+    if (reviewPendingWords.length === 0) {
         alert("Review complete!");
         const welcomeScreen = document.getElementById("welcome-screen");
         const reviewScreen = document.getElementById("quiz-screen");
@@ -373,7 +384,7 @@ function loadReviewWord(mode) {
     }
 
     // Get the current review word
-    currentReviewWord = incorrectWords.shift();
+    currentReviewWord = reviewPendingWords.shift();
     const prompt = document.getElementById("prompt");
     const choicesContainer = document.getElementById("choices");
 
@@ -394,7 +405,7 @@ function loadReviewWord(mode) {
     // Shuffle and generate answer choices
     const allChoices = shuffle([
         correctAnswer,
-        ...learnedWords
+        ...learningCompletedWords
             .filter((word) => word !== currentReviewWord)
             .map((word) => (mode === "meaningRecall" ? word.definition : word.word))
             .slice(0, 5),
@@ -403,7 +414,7 @@ function loadReviewWord(mode) {
     allChoices.forEach((choice) => {
         const button = document.createElement("button");
         button.textContent = choice;
-        button.addEventListener("click", () => handleAnswer(choice, correctAnswer));
+        button.addEventListener("click", () => handleQuizAnswer(choice, correctAnswer));
         choicesContainer.appendChild(button);
     });
 }
@@ -425,7 +436,7 @@ function loadReviewWord(mode) {
       welcomeScreen.classList.add("active");
   
       // Reset data for future study sessions
-      notLearnedWords = [...words];
+      remainingLearningWords= [...learningWordsPool];
       currentWord = null;
       iterationCount = 0;
       return;
@@ -519,7 +530,7 @@ function loadReviewWord(mode) {
         welcomeScreen.classList.add("active");
     
         // Reset data
-        notLearnedWords = [...words];
+        remainingLearningWords= [...learningWordsPool];
         currentWord = null;
     }
     
