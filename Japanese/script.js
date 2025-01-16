@@ -190,11 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
         finishStudy();
     });
 
-    document.getElementById("show-answer").addEventListener("click", () => {
-        console.log("Show Answer button clicked");
-        showAnswer();
-    });
-  
 
     document.addEventListener("DOMContentLoaded", () => {
         const nextWordButton = document.getElementById("next-word");
@@ -294,12 +289,6 @@ function startStudy(mode) {
 }
 
 
-
-
-
-
-
-
 function generateChoices(mode) {
     const choicesContainer = document.getElementById("choices");
     choicesContainer.innerHTML = "";
@@ -315,11 +304,13 @@ function generateChoices(mode) {
 
     const allChoices = shuffle([
         correctAnswer,
-        ...learnedWords
-            .filter(word => word !== currentReviewWord)
-            .map(word => (mode === "meaningRecall" ? word.definition : word.word))
-            .slice(0, 5)
+        ...shuffle(
+            learnedWords
+                .filter(word => word !== currentReviewWord) // Exclude the current review word
+                .map(word => (mode === "meaningRecall" ? word.definition : word.word))
+        ).slice(0, 5) // Shuffle first, then take 5 items
     ]);
+    
 
     allChoices.forEach(choice => {
         const button = document.createElement("button");
