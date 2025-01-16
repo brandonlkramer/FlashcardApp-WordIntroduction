@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("review-words").addEventListener("click", () => {
         console.log("Review Words button clicked");
-        startStudy("meaningRecall");
+        startStudy("formRecall");
     });
 
     document.getElementById("play-word").addEventListener("click", () => {
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("review-meanings").addEventListener("click", () => {
         console.log("Review Meanings button clicked");
-        startStudy("formRecall");
+        startStudy("meaningRecall");
     });
 
     document.getElementById("finish").addEventListener("click", () => {
