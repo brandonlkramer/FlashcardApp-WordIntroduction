@@ -42,7 +42,7 @@
             <button id="review-learned-words">Review Learned Words</button>
             <button id="meaningRecallButton">Quiz yourself: Word->Meaning (Easier)</button>
             <button id="formRecallButton">Quiz yourself: Meaning->Word (Harder)</button>
-            <button id="finish" class="hidden">Finish Studying</button>
+            <button id="finish" class="return-button">Finish Studying</button>
             <p id="progress">0 / 48 words learned</p>
         </div>
 
@@ -71,8 +71,10 @@
                     <span class="audio-icon">🔊</span> Listen
                 </button>
                 <button id="review-next-word" class="next-button">Next Word</button>
-            </div>     
+            </div>
+            <button id="review-return-button" class="return-button">Return to Welcome Screen</button>
         </div>
+        
 
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="screen hidden">
@@ -81,7 +83,9 @@
             <div id="choices" class="hidden">
                 <!-- Buttons for multiple choice answers will be dynamically generated -->
             </div>
+            <button id="quiz-return-button" class="return-button">Return to Welcome Screen</button>
         </div>
+        
     </div>
 
     <script type="module" src="script.js" defer></script>

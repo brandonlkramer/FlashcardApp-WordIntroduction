@@ -15,9 +15,11 @@ body {
     text-align: center;
 }
 
+/* General styling for screens */
 .screen {
     display: none; /* Hide all screens by default */
 }
+
 
 .screen.active {
     display: block; /* Show the active screen */
@@ -41,6 +43,12 @@ button:hover {
 
 .screen.hidden {
     display: none; /* Ensure hidden screens are not visible */
+}
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
 }
 
 #prompt, #answer {
@@ -196,3 +204,72 @@ iframe {
 .audio-icon {
     font-size: 22px; /* Adjust size of the icon */
 }
+.return-button {
+    margin: 0 auto; /* Centers the button horizontally */
+    display: block; /* Ensures it behaves like a block element */
+    margin-top: 20px;
+    background-color: #a9a9a9;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.return-button:hover {
+    background-color: #808080;
+}
+
+
+/* Quiz-specific styling to ensure alignment */
+#quiz-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+}
+
+.screen .return-button {
+    display: none; /* Default: Hidden */
+}
+
+.screen.active .return-button {
+    display: block; /* Visible only for active screens */
+}
+
+/* Softer red quiz buttons */
+#meaningRecallButton, #formRecallButton {
+    background-color: #FA8072; /* Soft salmon color */
+    color: white; /* Ensure text is readable */
+    border: none;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#meaningRecallButton:hover, #formRecallButton:hover {
+    background-color: #F08080; /* Light coral for hover effect */
+}
+
+/* Forest green review button */
+#review-learned-words {
+    background-color: #228B22; /* Forest Green */
+    color: white; /* Ensure text is readable */
+    border: none;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#review-learned-words:hover {
+    background-color: #006400; /* Dark Green for hover effect */
+}
+

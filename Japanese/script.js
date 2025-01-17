@@ -57,11 +57,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to switch between screens
     function switchToScreen(screen) {
         // Hide all screens
-        document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
+        document.querySelectorAll(".screen").forEach((s) => {
+            s.classList.add("hidden");
+            s.classList.remove("active");
+        });
+    
         // Show the specified screen
         screen.classList.remove("hidden");
         screen.classList.add("active");
     }
+    
+    
 
     
 
@@ -105,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentGroupStartIndex = 0; // Start index for the current group of words
     let currentReviewWord = null; // Current word for review
     let reviewPendingWords = []; // words that need further review
+    let quizPendingWords = []; // Words to be quizzed on
     let quizIncorrectWords = []; // Incorrectly answered words in the quiz
     let newWordsGroup = []; // To track the current batch of new words
     let reviewWords = []; // To track the current batch of review words
@@ -280,7 +287,38 @@ document.addEventListener("DOMContentLoaded", () => {
         const nextWordButton = document.getElementById("next-word");
         console.log("Next Word Button:", nextWordButton); // Should log the button element
     });
+
+    // Return to Welcome Screen from Review Mode
+    document.getElementById("review-return-button").addEventListener("click", () => {
+        console.log("Returning to Welcome Screen from Review Mode");
+        switchToScreen(document.getElementById("welcome-screen"));
+    });
+
+    document.getElementById("quiz-return-button").addEventListener("click", () => {
+        console.log("Returning to Welcome Screen from Quiz Mode");
+        
+        // Log the current state of the quiz and welcome screens
+        const quizScreen = document.getElementById("quiz-screen");
+        const welcomeScreen = document.getElementById("welcome-screen");
     
+        console.log("Before switching:");
+        console.log("Quiz Screen Classes:", quizScreen.classList);
+        console.log("Welcome Screen Classes:", welcomeScreen.classList);
+    
+        // Reset quiz state and switch screens
+        quizPendingWords = [];
+        currentReviewWord = null;
+        switchToScreen(welcomeScreen);
+    
+        // Log the state after attempting to switch
+        console.log("After switching:");
+        console.log("Quiz Screen Classes:", quizScreen.classList);
+        console.log("Welcome Screen Classes:", welcomeScreen.classList);
+    });
+    
+    
+    
+
 
     // Functions// Fisher-Yates Shuffle Algorithm
 function shuffle(array) {
@@ -352,6 +390,7 @@ function loadReviewWord() {
 function startQuiz(mode) {
     console.log("Starting study in mode:", mode);
     studyMode = mode;
+    quizIncorrectWords = []; // Reset the incorrect words array
 
     // Check if there are words to review
     if (learningCompletedWords.length === 0) {
@@ -360,12 +399,15 @@ function startQuiz(mode) {
     }
 
     // Populate reviewPendingWords with learningCompletedWords
-    reviewPendingWords = [...learningCompletedWords];
-    console.log("Words to review:", reviewPendingWords);
+    // quizPendingWords = [...learningCompletedWords];
+    console.log("Words in learningCompletedWords:", learningCompletedWords);
+    quizPendingWords = shuffle([...learningCompletedWords]); // Shuffle the words for review
+    console.log("Words to review:", quizPendingWords);
 
     // Get DOM elements
     const reviewHeader = document.getElementById("quiz-header");
-    const reviewScreen = document.getElementById("quiz-screen");
+    const reviewScreen = document.getElementById("review-screen");
+    const quizScreen = document.getElementById("quiz-screen");
     const welcomeScreen = document.getElementById("welcome-screen");
 
     if (!reviewHeader || !reviewScreen || !welcomeScreen) {
@@ -381,13 +423,8 @@ function startQuiz(mode) {
         reviewHeader.textContent = "What word best matches this meaning?";
     }
 
-    // Hide the welcome screen
-    welcomeScreen.classList.add("hidden");
-    welcomeScreen.classList.remove("active");
-
-    // Show the review screen
-    reviewScreen.classList.remove("hidden");
-    reviewScreen.classList.add("active");
+    // Hide the welcome screen and show the quiz screen
+    switchToScreen(document.getElementById("quiz-screen"));
 
     loadQuizWord(mode);
 }
@@ -430,7 +467,7 @@ function handleQuizAnswer(selected, correct) {
         alert("Correct!");
     } else {
         alert(`Incorrect. The correct answer is: ${correct}`);
-        reviewPendingWords.push(currentReviewWord);
+        quizPendingWords.push(currentReviewWord);
     }
     loadQuizWord(studyMode);
 }
@@ -447,21 +484,23 @@ function checkFinishButton() {
 }
 
 function loadQuizWord(mode) {
-    if (reviewPendingWords.length === 0) {
-        alert("Review complete!");
-        const welcomeScreen = document.getElementById("welcome-screen");
-        const reviewScreen = document.getElementById("quiz-screen");
+    if (quizPendingWords.length === 0) {
+        alert("Quiz completed!");
+        // Hide the quiz screen explicitly
+        const quizScreen = document.getElementById("quiz-screen");
+        quizScreen.classList.add("hidden");
+        quizScreen.classList.remove("active");
 
-        // Return to welcome screen
-        reviewScreen.classList.add("hidden");
-        reviewScreen.classList.remove("active");
+        // Show the welcome screen
+        const welcomeScreen = document.getElementById("welcome-screen");
         welcomeScreen.classList.remove("hidden");
         welcomeScreen.classList.add("active");
+
         return;
     }
 
     // Get the current review word
-    currentReviewWord = reviewPendingWords.shift();
+    currentReviewWord = quizPendingWords.shift();
     const prompt = document.getElementById("prompt");
     const choicesContainer = document.getElementById("choices");
 
@@ -574,8 +613,24 @@ function loadQuizWord(mode) {
   }
   
       
-      
-    
+    function showQuizScreen() {
+        switchToScreen(document.getElementById("quiz-screen"));
+        document.getElementById("quiz-return-button").style.display = "block"; // Show button
+
+        // Hide other screens
+        document.getElementById("welcome-screen").classList.add("hidden");
+        document.getElementById("review-screen").classList.add("hidden");
+    }
+
+    function showReviewScreen() {
+        switchToScreen(document.getElementById("review-screen"));
+        document.getElementById("review-return-button").style.display = "block"; // Show button
+
+        // Hide other screens
+        document.getElementById("welcome-screen").classList.add("hidden");
+        document.getElementById("quiz-screen").classList.add("hidden");
+    }
+
 
     function showAnswer() {
         console.log("Showing the answer for:", currentWord);
@@ -640,51 +695,7 @@ function loadQuizWord(mode) {
       
     
     
-    function markAsKnown(known) {
-        const now = new Date();
-    
-        // Convert to Japan Standard Time (JST)
-        const options = { timeZone: "Asia/Tokyo", hour12: false };
-        const dateFormatter = new Intl.DateTimeFormat("en-CA", {
-            ...options,
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-        });
-        const timeFormatter = new Intl.DateTimeFormat("en-CA", {
-            ...options,
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-        });
-    
-        const formattedDate = dateFormatter.format(now);
-        const formattedTime = timeFormatter.format(now);
-    
-        // Update the most recent study data entry for the current word
-        const latestEntry = studyData.find(
-            (entry) => entry.word === currentWord.word && entry.iteration === iterationCount
-        );
-    
-        if (latestEntry) {
-            latestEntry.answeredAtDate = formattedDate; // Date when answered
-            latestEntry.answeredAtTime = formattedTime; // Time when answered
-            latestEntry.learned = known ? "known" : "unknown"; // Known or unknown
-        } else {
-            console.warn("No matching study data entry found for the current word.");
-        }
-    
-        // If the word is not known, push it back to the list
-        if (!known) {
-            notLearnedWords.push(currentWord);
-        }
-    
-        setTimeout(() => {
-            loadNextWord();
-        }, 50); // Adds a 50ms delay
-        
-    }
-    
+
       
       
 });
