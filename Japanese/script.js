@@ -170,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (studyMode === "learnNewWords") {
                 learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add to learned words
                 learningCurrentIndex++; // Move to the next word
+                updateLearningProgress(); // Update the progress text
                 loadLearningWord(); // Load the next word
             }
         }
@@ -226,23 +227,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });      
     
     document.getElementById("learn-new-words").addEventListener("click", () => {
+        console.log("Learn New Words button clicked");
+    
         // Check if all words have been learned
-        if (learningGroupStartIndex >= learningWordsPool.length) {
+        if (learningCurrentIndex >= learningWordsPool.length) {
             alert("You have learned all available words!");
             return;
         }
     
-        // Set up the new batch of words for learning
-        newWordsGroup = learningWordsPool.slice(learningGroupStartIndex, learningGroupStartIndex + 12);
+        // Set up the batch of words starting from the current index
+        newWordsGroup = learningWordsPool.slice(learningCurrentIndex, learningCurrentIndex + 12);
     
-        // Set the starting index for the current group
-        learningCurrentIndex = learningGroupStartIndex; // Resume from saved progress
-        studyMode = "learnNewWords"; // Set study mode
+        // Set the study mode
+        studyMode = "learnNewWords";
     
-        // Switch to the learning screen and load the first word in the group
+        // Switch to the learning screen and load the first word
         switchToScreen(document.getElementById("learning-screen"));
         loadLearningWord();
     });
+    
     
 
     document.getElementById("review-learned-words").addEventListener("click", () => {
@@ -359,8 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 audioPlayCount, // Save audio play count
             };
     
-            console.log("Saving most recent data for Learn mode (Return button):", dataEntry);
-    
+   
             // Save only the most recent entry to the server
             saveDataToServer([dataEntry]);
     
@@ -459,19 +461,25 @@ function shuffle(array) {
 
 function updateLearningProgress() {
     const progressElement = document.getElementById("progress");
-    progressElement.textContent = `${learningCompletedWords.length} / ${learningWordsPool.length} words learned`;
+    progressElement.textContent = `${learningCurrentIndex} / ${learningWordsPool.length} words learned`;
 }
 
 
+
 function loadLearningWord() {
-    // Check if the current index exceeds the current group size or the total pool length
-    if (learningCurrentIndex >= learningGroupStartIndex + 12 || learningCurrentIndex >= learningWordsPool.length) {
-        alert("12 new words learned! Please quiz yourself to practice them.");
-        // saveDataToServer(studyData); // Save data before returning to the welcome screen
-        studyData = []; // Reset the study data array
-        learningGroupStartIndex += 12; // Increment the group index for the next session
+    // Stop if the current index exceeds the total pool length
+    if (learningCurrentIndex >= learningWordsPool.length) {
+        alert("You have completed all the words available for learning!");
         updateLearningProgress();
-        switchToScreen(welcomeScreen); // Go back to study options
+        switchToScreen(document.getElementById("welcome-screen")); // Return to welcome screen
+        return;
+    }
+
+    // Stop if 12 words in this session have been learned
+    if (learningCurrentIndex >= newWordsGroup[0].startIndex + 12) {
+        alert("You have completed this session of 12 words. Please quiz yourself or review!");
+        updateLearningProgress();
+        switchToScreen(document.getElementById("welcome-screen")); // Return to welcome screen
         return;
     }
 
@@ -482,7 +490,7 @@ function loadLearningWord() {
         return;
     }
 
-    // Update the UI for learning mode
+    // Update the UI for the current word
     document.getElementById("word-line").innerHTML = `
         <span class="word">${word.word}</span> 
         <span class="part-of-speech">[${word.partOfSpeech}]</span>
@@ -490,6 +498,7 @@ function loadLearningWord() {
     document.getElementById("definition-line").textContent = word.definition;
     document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
 }
+
 
 
 
