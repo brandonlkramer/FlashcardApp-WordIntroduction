@@ -107,6 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let reviewPendingWords = []; // words that need further review
     let quizIncorrectWords = []; // Incorrectly answered words in the quiz
     let newWordsGroup = []; // To track the current batch of new words
+    let reviewWords = []; // To track the current batch of review words
+    let reviewCurrentIndex = 0; // Index for reviewing learned words
 
 
 
@@ -126,17 +128,55 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.target && event.target.id === "next-word") {
             console.log("Next word button clicked via delegation");
     
-            if (!learningWordsPool[learningCurrentIndex]) {
-                console.error("No more words to learn.");
-                return;
+            // Check for study mode
+            if (studyMode === "learnNewWords") {
+
+                if (!learningWordsPool[learningCurrentIndex]) {
+                    console.error("No more words to learn.");
+                    return;
+                }
+        
+                learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add the current word to learned words
+                learningCurrentIndex++; // Move to the next word
+                loadLearningWord(); // Load the next word
+            } else if (studyMode === "reviewLearned") {
+                if (!reviewPendingWords[reviewCurrentIndex]) {
+                    console.error("No more words to review.");
+                    return;
+                }
+        
+                reviewCurrentIndex++; // Move to the next word
+                loadReviewWord(); // Load the next word
             }
-    
-            learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add the current word to learned words
-            learningCurrentIndex++; // Move to the next word
-            loadLearningWord(); // Load the next word
         }
     });
     
+    document.body.addEventListener("click", (event) => {
+        if (event.target && event.target.id === "review-next-word") {
+            console.log("Next word button clicked via delegation");
+    
+            // Check for study mode
+            if (studyMode === "learnNewWords") {
+
+                if (!learningWordsPool[learningCurrentIndex]) {
+                    console.error("No more words to learn.");
+                    return;
+                }
+        
+                learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add the current word to learned words
+                learningCurrentIndex++; // Move to the next word
+                loadLearningWord(); // Load the next word
+            } else if (studyMode === "reviewLearned") {
+                if (!reviewPendingWords[reviewCurrentIndex]) {
+                    console.error("No more words to review.");
+                    return;
+                }
+        
+                reviewCurrentIndex++; // Move to the next word
+                loadReviewWord(); // Load the next word
+            }
+        }
+    });
     
 
 
@@ -156,7 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
         // Set the starting index for the current group
         learningCurrentIndex = learningGroupStartIndex;
-    
+        studyMode = "learnNewWords"; // Set study mode
+
         // Switch to the learning screen and load the first word in the group
         switchToScreen(document.getElementById("learning-screen"));
         loadLearningWord();
@@ -174,15 +215,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Set up review mode with learned words
         reviewPendingWords = [...learningCompletedWords];
         currentReviewWord = null; // Reset the current review word
+        reviewCurrentIndex = 0; // Reset the current index
         studyMode = "reviewLearned"; // Set study mode
-        startStudy("reviewLearned");
+        switchToScreen(document.getElementById("review-screen"));
+        loadReviewWord();
     });
     
     
 
     document.getElementById("formRecallButton").addEventListener("click", () => {
         console.log("Review Words button clicked");
-        startStudy("formRecall");
+        startQuiz("formRecall");
     });
 
     document.getElementById("play-word").addEventListener("click", () => {
@@ -203,9 +246,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });  
 
+    document.getElementById("review-play-word").addEventListener("click", () => {
+        // Ensure a word is currently being displayed
+        if (!reviewPendingWords[reviewCurrentIndex]) {
+            console.error("No word found to play audio for.");
+            return;
+        }
+    
+        const word = reviewPendingWords[reviewCurrentIndex].word; // Get the current word
+        const audioPath = `../audio/${word}.mp3`; // Path to the audio file
+    
+        // Create a new Audio object and play the file
+        const audio = new Audio(audioPath);
+        audio.play().catch(error => {
+            console.error("Error playing audio:", error);
+            alert(`Audio file not found for "${word}".`);
+        });
+    });  
+
+
     document.getElementById("meaningRecallButton").addEventListener("click", () => {
         console.log("Review Meanings button clicked");
-        startStudy("meaningRecall");
+        startQuiz("meaningRecall");
     });
 
     document.getElementById("finish").addEventListener("click", () => {
@@ -234,14 +296,6 @@ function updateLearningProgress() {
     progressElement.textContent = `${learningCompletedWords.length} / 48 words learned`;
 }
 
-function startReview(mode) {
-    reviewPendingWords = [...learningCompletedWords];
-    currentReviewWord = null;
-    const reviewHeader = document.getElementById("quiz-header");
-    reviewHeader.textContent = mode === "meaningRecall" ? "What does this word mean?" : "What word matches this meaning?";
-    switchToScreen(document.getElementById("quiz-screen"));
-    loadReviewWord(mode);
-}
 
 function loadLearningWord() {
     // Check if the current index exceeds the 12 new words for this session
@@ -269,10 +323,33 @@ function loadLearningWord() {
     document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
 }
 
+function loadReviewWord() {
+    // Check if the current index exceeds the 12 new words for this session
+    if (reviewCurrentIndex >= reviewPendingWords.length) {
+        alert("You have finished reviewing this set of words. Please quiz yourself to practice them.");
+        switchToScreen(document.getElementById("welcome-screen")); // Go back to study options
+        return;
+    }
+
+    // Load the next word for the session from the new words group
+    const word = reviewPendingWords[reviewCurrentIndex]; // Adjust for the current group index
+    if (!word) {
+        console.error("Word not found for index:", reviewCurrentIndex);
+        return;
+    }
+
+    // Update the UI for learning mode
+    document.getElementById("review-word-line").innerHTML = `
+        <span class="word">${word.word}</span> 
+        <span class="part-of-speech">[${word.partOfSpeech}]</span>
+    `;
+    document.getElementById("review-definition-line").textContent = word.definition;
+    document.getElementById("review-example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
+}
 
 
 
-function startStudy(mode) {
+function startQuiz(mode) {
     console.log("Starting study in mode:", mode);
     studyMode = mode;
 
@@ -312,7 +389,7 @@ function startStudy(mode) {
     reviewScreen.classList.remove("hidden");
     reviewScreen.classList.add("active");
 
-    loadReviewWord(mode);
+    loadQuizWord(mode);
 }
 
 
@@ -355,7 +432,7 @@ function handleQuizAnswer(selected, correct) {
         alert(`Incorrect. The correct answer is: ${correct}`);
         reviewPendingWords.push(currentReviewWord);
     }
-    loadReviewWord(studyMode);
+    loadQuizWord(studyMode);
 }
 
 function checkFinishButton() {
@@ -369,7 +446,7 @@ function checkFinishButton() {
     }
 }
 
-function loadReviewWord(mode) {
+function loadQuizWord(mode) {
     if (reviewPendingWords.length === 0) {
         alert("Review complete!");
         const welcomeScreen = document.getElementById("welcome-screen");

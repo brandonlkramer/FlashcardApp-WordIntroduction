@@ -113,6 +113,10 @@ iframe {
     font-size: 24px;
 }
 
+#review-screen h1 {
+    font-size: 24px;
+}
+
 #word-line {
     font-size: 36px; /* Larger font for the word */
 }
@@ -123,6 +127,20 @@ iframe {
 }
 
 #example-line {
+    font-size: 24px; /* Slightly smaller size for the example */
+    margin-top: 10px;
+}
+
+#review-word-line {
+    font-size: 36px; /* Larger font for the word */
+}
+
+#review-definition-line {
+    font-size: 28px; /* Adjust font size for the definition */
+    margin-top: 10px; /* Add spacing between lines */
+}
+
+#review-example-line {
     font-size: 24px; /* Slightly smaller size for the example */
     margin-top: 10px;
 }
