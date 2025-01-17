@@ -156,6 +156,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     shownAtTime,
                     language: "Japanese",
                     studyMode: "learnNewWords",
+                    answeredAtDate: null, // Save as null for review mode
+                    answeredAtTime: null, // Save as null for review mode
+                    correct: null, // Save as null for review mode
                     audioPlayCount, // Save audio play count
                 };
     
@@ -201,6 +204,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     shownAtTime,
                     language: "Japanese",
                     studyMode: "reviewLearned",
+                    answeredAtDate: null, // Save as null for review mode
+                    answeredAtTime: null, // Save as null for review mode
+                    correct: null, // Save as null for review mode
                     audioPlayCount, // Save audio play count
                 };
     
@@ -359,6 +365,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 shownAtTime,
                 language: "Japanese",
                 studyMode: "learnNewWords",
+                answeredAtDate: null, // Save as null for review mode
+                answeredAtTime: null, // Save as null for review mode
+                correct: null, // Save as null for review mode
                 audioPlayCount, // Save audio play count
             };
     
@@ -403,6 +412,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 shownAtTime,
                 language: "Japanese",
                 studyMode: "reviewLearned",
+                answeredAtDate: null, // Save as null for review mode
+                answeredAtTime: null, // Save as null for review mode
+                correct: null, // Save as null for review mode
                 audioPlayCount, // Save audio play count
             };
     
@@ -425,26 +437,47 @@ document.addEventListener("DOMContentLoaded", () => {
     
 
     document.getElementById("quiz-return-button").addEventListener("click", () => {
-        console.log("Returning to Welcome Screen from Quiz Mode");
-        
-        // Log the current state of the quiz and welcome screens
-        const quizScreen = document.getElementById("quiz-screen");
-        const welcomeScreen = document.getElementById("welcome-screen");
+        console.log("Return to Welcome Screen button clicked during Quiz Mode");
     
-        console.log("Before switching:");
-        console.log("Quiz Screen Classes:", quizScreen.classList);
-        console.log("Welcome Screen Classes:", welcomeScreen.classList);
+        if (studyMode === "meaningRecall" || studyMode === "formRecall") {
+            const now = new Date();
+            const shownAtDate = currentReviewWord.shownAtDate || new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+            const shownAtTime = currentReviewWord.shownAtTime || new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Asia/Tokyo",
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            }).format(now);
     
-        // Reset quiz state and switch screens
-        quizPendingWords = [];
+            const dataEntry = {
+                participant: participantNumber,
+                word: currentReviewWord.word,
+                definition: currentReviewWord.definition,
+                shownAtDate, // Use the existing or fallback to current timestamp
+                shownAtTime, // Use the existing or fallback to current timestamp
+                language: "Japanese",
+                studyMode: studyMode, // Quiz mode (meaningRecall or formRecall)
+                answeredAtDate: null, // Set to null
+                answeredAtTime: null, // Set to null
+                correct: null, // Set to null
+                audioPlayCount: 0, // Default or reset audio play count
+            };
+    
+            //console.log("Saving most recent data for Quiz mode (Return button):", dataEntry);
+    
+            // Save only the most recent entry to the server
+            saveDataToServer([dataEntry]);
+        }
+    
+        // Reset `currentReviewWord` and `quizPendingWords` to avoid redundancy
         currentReviewWord = null;
-        switchToScreen(welcomeScreen);
+        quizPendingWords = [];
     
-        // Log the state after attempting to switch
-        console.log("After switching:");
-        console.log("Quiz Screen Classes:", quizScreen.classList);
-        console.log("Welcome Screen Classes:", welcomeScreen.classList);
+        // Return to the welcome screen
+        switchToScreen(welcomeScreen);
     });
+    
     
     
     
@@ -639,10 +672,11 @@ function handleQuizAnswer(selected, correct) {
         answeredAtDate,
         answeredAtTime,
         correct: isCorrect,
+        audioPlayCount: 0, // Reset audio play count
     };
 
     saveDataToServer([dataEntry]);
-    // console.log("Saved data for Quiz mode:", dataEntry);
+    //console.log("Saved data for Quiz mode:", dataEntry);
 
     loadQuizWord(studyMode);
 }
