@@ -8,6 +8,10 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="script.js" defer></script>
+    
+
 </head>
 <body>
     <div id="app">
@@ -24,9 +28,10 @@
             <h1>How to Use This App</h1>
             <p>Watch the video below to learn how to use this app:</p>
             <iframe 
+                id="explainer-video"    
                 width="560" 
                 height="315" 
-                src="https://www.youtube.com/embed/Bn-iNJf_KnM" 
+                src="https://www.youtube.com/embed/Bn-iNJf_KnM?enablejsapi=1" 
                 title="YouTube video player" 
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 

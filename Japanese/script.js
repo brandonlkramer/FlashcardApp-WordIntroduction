@@ -1,3 +1,16 @@
+let player;
+
+// Initialize the YouTube API when it's ready
+function onYouTubeIframeAPIReady() {
+    console.log('onYouTubeIframeAPIReady called');
+    player = new YT.Player('explainer-video', {
+        events: {
+            onReady: () => console.log('YouTube Player is ready.'),
+        },
+    });
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const firebaseConfig = {
         apiKey: "AIzaSyA9FVkm0z8nbmDCiND1xlKpOXeEObwBCJY",
@@ -24,6 +37,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const participantInput = document.getElementById("participant-number");
     const submitParticipantButton = document.getElementById("submit-participant-number");
     const understandButton = document.getElementById("understand-button");
+
+
+    
+    // Stop the video when switching screens
+    function stopYouTubeVideo() {
+        if (player && typeof player.stopVideo === 'function') {
+            player.stopVideo();
+            console.log("YouTube video stopped.");
+        }
+    }
+    
+
 
     // Check if participant number is in the URL
     const participantFromURL = new URLSearchParams(window.location.search).get("participant");
@@ -56,16 +81,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to switch between screens
     function switchToScreen(screen) {
+        // Stop the YouTube video if leaving the explainer screen
+        const currentScreen = document.querySelector('.screen.active');
+        if (currentScreen && currentScreen.id === 'explainer-screen' && player) {
+            stopYouTubeVideo();
+        }
+    
         // Hide all screens
-        document.querySelectorAll(".screen").forEach((s) => {
-            s.classList.add("hidden");
-            s.classList.remove("active");
+        document.querySelectorAll('.screen').forEach((s) => {
+            s.classList.add('hidden');
+            s.classList.remove('active');
         });
     
         // Show the specified screen
-        screen.classList.remove("hidden");
-        screen.classList.add("active");
+        screen.classList.remove('hidden');
+        screen.classList.add('active');
     }
+    
     
     
 
@@ -117,6 +149,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let reviewWords = []; // To track the current batch of review words
     let reviewCurrentIndex = 0; // Index for reviewing learned words
     let audioPlayCount = 0; // Count of audio plays for the current word
+
+    
 
 
 
