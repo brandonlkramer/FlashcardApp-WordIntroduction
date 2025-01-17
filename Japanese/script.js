@@ -202,13 +202,14 @@ document.addEventListener("DOMContentLoaded", () => {
         newWordsGroup = learningWordsPool.slice(learningGroupStartIndex, learningGroupStartIndex + 12);
     
         // Set the starting index for the current group
-        learningCurrentIndex = learningGroupStartIndex;
+        learningCurrentIndex = learningGroupStartIndex; // Resume from saved progress
         studyMode = "learnNewWords"; // Set study mode
-
+    
         // Switch to the learning screen and load the first word in the group
         switchToScreen(document.getElementById("learning-screen"));
         loadLearningWord();
     });
+    
 
     document.getElementById("review-learned-words").addEventListener("click", () => {
         console.log("Review Learned Words button clicked");
@@ -288,6 +289,26 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Next Word Button:", nextWordButton); // Should log the button element
     });
 
+    // Return to Welcome Screen from Learning Mode
+    document.getElementById("learning-return-button").addEventListener("click", () => {
+        console.log("Returning to Welcome Screen from Learning Mode");
+
+        // Update the starting index for the next session based on current progress
+        learningGroupStartIndex = learningCurrentIndex; // Save progress to start from the next word
+        console.log("Learning progress saved. Next start index:", learningGroupStartIndex);
+
+        // Update the welcome screen display
+        updateLearningProgress();
+
+        // Reset the current word and mode
+        currentWord = null;
+        studyMode = null;
+
+        // Navigate back to the welcome screen
+        switchToScreen(document.getElementById("welcome-screen"));
+    });
+
+
     // Return to Welcome Screen from Review Mode
     document.getElementById("review-return-button").addEventListener("click", () => {
         console.log("Returning to Welcome Screen from Review Mode");
@@ -331,22 +352,22 @@ function shuffle(array) {
 
 function updateLearningProgress() {
     const progressElement = document.getElementById("progress");
-    progressElement.textContent = `${learningCompletedWords.length} / 48 words learned`;
+    progressElement.textContent = `${learningCompletedWords.length} / ${learningWordsPool.length} words learned`;
 }
 
 
 function loadLearningWord() {
-    // Check if the current index exceeds the 12 new words for this session
+    // Check if the current index exceeds the current group size or the total pool length
     if (learningCurrentIndex >= learningGroupStartIndex + 12 || learningCurrentIndex >= learningWordsPool.length) {
-        alert("You have finished learning this set of words. Please quiz yourself to practice them.");
+        alert("12 new words learned! Please quiz yourself to practice them.");
         learningGroupStartIndex += 12; // Increment the group index for the next session
         updateLearningProgress();
         switchToScreen(document.getElementById("welcome-screen")); // Go back to study options
         return;
     }
 
-    // Load the next word for the session from the new words group
-    const word = newWordsGroup[learningCurrentIndex - learningGroupStartIndex]; // Adjust for the current group index
+    // Load the next word for the session
+    const word = learningWordsPool[learningCurrentIndex];
     if (!word) {
         console.error("Word not found for index:", learningCurrentIndex);
         return;
@@ -360,6 +381,7 @@ function loadLearningWord() {
     document.getElementById("definition-line").textContent = word.definition;
     document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
 }
+
 
 function loadReviewWord() {
     // Check if the current index exceeds the 12 new words for this session
