@@ -676,8 +676,6 @@ function loadQuizWord(mode) {
                     definition: entry.definition,
                     shownAtDate: entry.shownAtDate,
                     shownAtTime: entry.shownAtTime,
-                    iteration: entry.iteration,
-                    direction: entry.direction,
                     language: "Japanese", // Hardcoded
                     answeredAtDate: entry.answeredAtDate || null,
                     answeredAtTime: entry.answeredAtTime || null,
