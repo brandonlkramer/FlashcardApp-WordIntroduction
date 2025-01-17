@@ -56,18 +56,18 @@ async function exportData() {
       data.push({ id: doc.id, ...doc.data() });
     });
 
-    // Deduplicate data based on unique fields
-    const uniqueData = data.filter((item, index, self) =>
-      index === self.findIndex(other =>
-        other.participant === item.participant &&
-        other.word === item.word &&
-        other.iteration === item.iteration &&
-        other.shownAtDate === item.shownAtDate &&
-        other.shownAtTime === item.shownAtTime
-      )
-    );
+    // Deduplicate data using a Set
+    const seen = new Set();
+    const uniqueData = data.filter((item) => {
+      const key = `${item.participant}-${item.word}-${item.iteration}-${item.shownAtDate}-${item.shownAtTime}`;
+      if (seen.has(key)) {
+        return false; // Duplicate, skip
+      }
+      seen.add(key);
+      return true; // Unique, keep
+    });
 
-    // Write deduplicated data to a CSV file with JST date and time in the filename
+    // Write deduplicated data to a CSV file
     const ws = fs.createWriteStream(filePath);
     writeToStream(ws, uniqueData, { headers: true })
       .on('finish', () => console.log(`Data has been exported to ${filePath}`))

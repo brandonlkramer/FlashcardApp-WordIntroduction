@@ -116,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let newWordsGroup = []; // To track the current batch of new words
     let reviewWords = []; // To track the current batch of review words
     let reviewCurrentIndex = 0; // Index for reviewing learned words
+    let audioPlayCount = 0; // Count of audio plays for the current word
 
 
 
@@ -133,57 +134,90 @@ document.addEventListener("DOMContentLoaded", () => {
     
      document.body.addEventListener("click", (event) => {
         if (event.target && event.target.id === "next-word") {
-            console.log("Next word button clicked via delegation");
+            console.log("Next word button clicked");
+            
+            // Save the current word data before switching to the next
+            if (studyMode === "learnNewWords" && learningWordsPool[learningCurrentIndex]) {
+                const now = new Date();
+                const shownAtDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+                const shownAtTime = new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "Asia/Tokyo",
+                    hour12: false,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                }).format(now);
     
-            // Check for study mode
+                const dataEntry = {
+                    participant: participantNumber,
+                    word: learningWordsPool[learningCurrentIndex].word,
+                    definition: learningWordsPool[learningCurrentIndex].definition,
+                    shownAtDate,
+                    shownAtTime,
+                    language: "Japanese",
+                    studyMode: "learnNewWords",
+                    audioPlayCount, // Save audio play count
+                };
+    
+                studyData.push(dataEntry);
+                console.log("Saved data for Learn mode:", dataEntry);
+    
+                // Reset audio play count for the next word
+                audioPlayCount = 0;
+            }
+    
+            // Proceed to the next word
             if (studyMode === "learnNewWords") {
-
-                if (!learningWordsPool[learningCurrentIndex]) {
-                    console.error("No more words to learn.");
-                    return;
-                }
-        
-                learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add the current word to learned words
+                learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add to learned words
                 learningCurrentIndex++; // Move to the next word
                 loadLearningWord(); // Load the next word
-            } else if (studyMode === "reviewLearned") {
-                if (!reviewPendingWords[reviewCurrentIndex]) {
-                    console.error("No more words to review.");
-                    return;
-                }
-        
-                reviewCurrentIndex++; // Move to the next word
-                loadReviewWord(); // Load the next word
             }
         }
     });
+    
     
     document.body.addEventListener("click", (event) => {
         if (event.target && event.target.id === "review-next-word") {
-            console.log("Next word button clicked via delegation");
+            console.log("Next word button clicked in Review Mode");
     
-            // Check for study mode
-            if (studyMode === "learnNewWords") {
-
-                if (!learningWordsPool[learningCurrentIndex]) {
-                    console.error("No more words to learn.");
-                    return;
-                }
-        
-                learningCompletedWords.push(learningWordsPool[learningCurrentIndex]); // Add the current word to learned words
-                learningCurrentIndex++; // Move to the next word
-                loadLearningWord(); // Load the next word
-            } else if (studyMode === "reviewLearned") {
-                if (!reviewPendingWords[reviewCurrentIndex]) {
-                    console.error("No more words to review.");
-                    return;
-                }
-        
+            // Save the current word data before switching to the next word
+            if (studyMode === "reviewLearned" && reviewPendingWords[reviewCurrentIndex]) {
+                const now = new Date();
+                const shownAtDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+                const shownAtTime = new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "Asia/Tokyo",
+                    hour12: false,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                }).format(now);
+    
+                const dataEntry = {
+                    participant: participantNumber,
+                    word: reviewPendingWords[reviewCurrentIndex].word,
+                    definition: reviewPendingWords[reviewCurrentIndex].definition,
+                    shownAtDate,
+                    shownAtTime,
+                    language: "Japanese",
+                    studyMode: "reviewLearned",
+                    audioPlayCount, // Save audio play count
+                };
+    
+                studyData.push(dataEntry);
+                console.log("Saved data for Review mode:", dataEntry);
+    
+                // Reset audio play count for the next word
+                audioPlayCount = 0;
+            }
+    
+            // Proceed to the next word
+            if (studyMode === "reviewLearned") {
                 reviewCurrentIndex++; // Move to the next word
                 loadReviewWord(); // Load the next word
             }
         }
     });
+    
     
 
 
@@ -242,17 +276,22 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("No word found to play audio for.");
             return;
         }
-    
+
         const word = learningWordsPool[learningCurrentIndex].word; // Get the current word
         const audioPath = `../audio/${word}.mp3`; // Path to the audio file
     
         // Create a new Audio object and play the file
         const audio = new Audio(audioPath);
-        audio.play().catch(error => {
+        audio.play()
+        .then(() => {
+            audioPlayCount++; // Increment audio play count
+            console.log(`Audio played for "${word}" (${audioPlayCount} times)`);
+        })
+        .catch((error) => {
             console.error("Error playing audio:", error);
             alert(`Audio file not found for "${word}".`);
         });
-    });  
+    });
 
     document.getElementById("review-play-word").addEventListener("click", () => {
         // Ensure a word is currently being displayed
@@ -260,17 +299,22 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("No word found to play audio for.");
             return;
         }
-    
+
         const word = reviewPendingWords[reviewCurrentIndex].word; // Get the current word
         const audioPath = `../audio/${word}.mp3`; // Path to the audio file
     
         // Create a new Audio object and play the file
         const audio = new Audio(audioPath);
-        audio.play().catch(error => {
+        audio.play()
+        .then(() => {
+            audioPlayCount++; // Increment audio play count
+            console.log(`Audio played for "${word}" (${audioPlayCount} times)`);
+        })
+        .catch((error) => {
             console.error("Error playing audio:", error);
             alert(`Audio file not found for "${word}".`);
         });
-    });  
+    }); 
 
 
     document.getElementById("meaningRecallButton").addEventListener("click", () => {
@@ -291,29 +335,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Return to Welcome Screen from Learning Mode
     document.getElementById("learning-return-button").addEventListener("click", () => {
-        console.log("Returning to Welcome Screen from Learning Mode");
-
-        // Update the starting index for the next session based on current progress
-        learningGroupStartIndex = learningCurrentIndex; // Save progress to start from the next word
-        console.log("Learning progress saved. Next start index:", learningGroupStartIndex);
-
-        // Update the welcome screen display
-        updateLearningProgress();
-
-        // Reset the current word and mode
-        currentWord = null;
-        studyMode = null;
-
-        // Navigate back to the welcome screen
-        switchToScreen(document.getElementById("welcome-screen"));
+        console.log("Return to Welcome Screen button clicked in Learn Mode");
+    
+        if (studyMode === "learnNewWords" && learningWordsPool[learningCurrentIndex]) {
+            const now = new Date();
+            const shownAtDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+            const shownAtTime = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Asia/Tokyo",
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            }).format(now);
+    
+            const dataEntry = {
+                participant: participantNumber,
+                word: learningWordsPool[learningCurrentIndex].word,
+                definition: learningWordsPool[learningCurrentIndex].definition,
+                shownAtDate,
+                shownAtTime,
+                language: "Japanese",
+                studyMode: "learnNewWords",
+                audioPlayCount, // Save audio play count
+            };
+    
+            console.log("Saving most recent data for Learn mode (Return button):", dataEntry);
+    
+            // Save only the most recent entry to the server
+            saveDataToServer([dataEntry]);
+    
+            // Reset audio play count
+            audioPlayCount = 0;
+        }
+    
+        // Clear the `studyData` array to avoid redundancy
+        studyData = [];
+    
+        // Return to the welcome screen
+        switchToScreen(welcomeScreen);
     });
+    
+    
 
 
     // Return to Welcome Screen from Review Mode
     document.getElementById("review-return-button").addEventListener("click", () => {
-        console.log("Returning to Welcome Screen from Review Mode");
-        switchToScreen(document.getElementById("welcome-screen"));
+        console.log("Return to Welcome Screen button clicked in Review Mode");
+    
+        if (studyMode === "reviewLearned" && reviewPendingWords[reviewCurrentIndex]) {
+            const now = new Date();
+            const shownAtDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+            const shownAtTime = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Asia/Tokyo",
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            }).format(now);
+    
+            const dataEntry = {
+                participant: participantNumber,
+                word: reviewPendingWords[reviewCurrentIndex].word,
+                definition: reviewPendingWords[reviewCurrentIndex].definition,
+                shownAtDate,
+                shownAtTime,
+                language: "Japanese",
+                studyMode: "reviewLearned",
+                audioPlayCount, // Save audio play count
+            };
+    
+            console.log("Saving most recent data for Review mode (Return button):", dataEntry);
+    
+            // Save only the most recent entry to the server
+            saveDataToServer([dataEntry]);
+    
+            // Reset audio play count
+            audioPlayCount = 0;
+        }
+    
+        // Clear the `studyData` array to avoid redundancy
+        studyData = [];
+    
+        // Return to the welcome screen
+        switchToScreen(welcomeScreen);
     });
+    
+    
 
     document.getElementById("quiz-return-button").addEventListener("click", () => {
         console.log("Returning to Welcome Screen from Quiz Mode");
@@ -360,9 +467,11 @@ function loadLearningWord() {
     // Check if the current index exceeds the current group size or the total pool length
     if (learningCurrentIndex >= learningGroupStartIndex + 12 || learningCurrentIndex >= learningWordsPool.length) {
         alert("12 new words learned! Please quiz yourself to practice them.");
+        // saveDataToServer(studyData); // Save data before returning to the welcome screen
+        studyData = []; // Reset the study data array
         learningGroupStartIndex += 12; // Increment the group index for the next session
         updateLearningProgress();
-        switchToScreen(document.getElementById("welcome-screen")); // Go back to study options
+        switchToScreen(welcomeScreen); // Go back to study options
         return;
     }
 
@@ -383,22 +492,26 @@ function loadLearningWord() {
 }
 
 
+
+
 function loadReviewWord() {
-    // Check if the current index exceeds the 12 new words for this session
+    // Check if the current index exceeds the review words
     if (reviewCurrentIndex >= reviewPendingWords.length) {
         alert("You have finished reviewing this set of words. Please quiz yourself to practice them.");
+        // saveDataToServer(studyData); // Save data before returning to the welcome screen
+        studyData = []; // Reset the study data array
         switchToScreen(document.getElementById("welcome-screen")); // Go back to study options
         return;
     }
 
-    // Load the next word for the session from the new words group
-    const word = reviewPendingWords[reviewCurrentIndex]; // Adjust for the current group index
+    // Load the next word for review
+    const word = reviewPendingWords[reviewCurrentIndex];
     if (!word) {
         console.error("Word not found for index:", reviewCurrentIndex);
         return;
     }
 
-    // Update the UI for learning mode
+    // Update the UI for review mode
     document.getElementById("review-word-line").innerHTML = `
         <span class="word">${word.word}</span> 
         <span class="part-of-speech">[${word.partOfSpeech}]</span>
@@ -406,6 +519,8 @@ function loadReviewWord() {
     document.getElementById("review-definition-line").textContent = word.definition;
     document.getElementById("review-example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
 }
+
+
 
 
 
@@ -485,14 +600,44 @@ function generateChoices(mode) {
 
 
 function handleQuizAnswer(selected, correct) {
-    if (selected === correct) {
+    const now = new Date();
+    const answeredAtDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+    const answeredAtTime = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Tokyo",
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    }).format(now);
+
+    const isCorrect = selected === correct;
+    if (isCorrect) {
         alert("Correct!");
     } else {
         alert(`Incorrect. The correct answer is: ${correct}`);
-        quizPendingWords.push(currentReviewWord);
+        quizPendingWords.push(currentReviewWord); // Push back to quiz
     }
+
+    // Use `shownAtDate` and `shownAtTime` from `currentReviewWord`
+    const dataEntry = {
+        participant: participantNumber,
+        word: currentReviewWord.word,
+        definition: currentReviewWord.definition,
+        shownAtDate: currentReviewWord.shownAtDate, // Add shownAtDate
+        shownAtTime: currentReviewWord.shownAtTime, // Add shownAtTime
+        language: "Japanese",
+        studyMode: studyMode, // Quiz mode (meaningRecall or formRecall)
+        answeredAtDate,
+        answeredAtTime,
+        correct: isCorrect,
+    };
+
+    saveDataToServer([dataEntry]);
+    // console.log("Saved data for Quiz mode:", dataEntry);
+
     loadQuizWord(studyMode);
 }
+
 
 function checkFinishButton() {
     if (learningCompletedWords.length >= 48) {
@@ -508,6 +653,8 @@ function checkFinishButton() {
 function loadQuizWord(mode) {
     if (quizPendingWords.length === 0) {
         alert("Quiz completed!");
+        saveDataToServer(studyData); // Save data before returning to the welcome screen
+
         // Hide the quiz screen explicitly
         const quizScreen = document.getElementById("quiz-screen");
         quizScreen.classList.add("hidden");
@@ -523,6 +670,22 @@ function loadQuizWord(mode) {
 
     // Get the current review word
     currentReviewWord = quizPendingWords.shift();
+
+    // Capture the timestamp when the word/definition is shown
+    const now = new Date();
+    const shownAtDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(now);
+    const shownAtTime = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Tokyo",
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    }).format(now);
+
+    // Save the timestamps to the current review word
+    currentReviewWord.shownAtDate = shownAtDate;
+    currentReviewWord.shownAtTime = shownAtTime;
+
     const prompt = document.getElementById("prompt");
     const choicesContainer = document.getElementById("choices");
 
@@ -556,6 +719,7 @@ function loadQuizWord(mode) {
         choicesContainer.appendChild(button);
     });
 }
+
 
 
 
@@ -690,19 +854,10 @@ function loadQuizWord(mode) {
     
     function saveDataToServer(data) {
         const db = firebase.firestore();
-        data.forEach(entry => {
+        
+        data.forEach((entry) => {
             db.collection("intro_data")
-                .add({
-                    participant: entry.participant,
-                    word: entry.word,
-                    definition: entry.definition,
-                    shownAtDate: entry.shownAtDate,
-                    shownAtTime: entry.shownAtTime,
-                    language: "Japanese", // Hardcoded
-                    answeredAtDate: entry.answeredAtDate || null,
-                    answeredAtTime: entry.answeredAtTime || null,
-                    learned: entry.learned || null
-                })
+                .add(entry)
                 .then(() => {
                     console.log("Data saved to Firebase:", entry);
                 })
@@ -712,10 +867,5 @@ function loadQuizWord(mode) {
         });
     }
     
-      
-    
-    
-
-      
-      
+     
 });
