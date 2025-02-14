@@ -11,8 +11,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     firebase.initializeApp(firebaseConfig);
 
+    // 🔹 Make Sure Firebase Auth is Defined
+    if (!firebase.auth) {
+        console.error("Firebase Auth is not available. Check your Firebase imports.");
+    } else {
+        const auth = firebase.auth();
+    
+        auth.signInAnonymously()
+          .then(() => {
+            console.log("Signed in anonymously");
+          })
+          .catch((error) => {
+            console.error("Error signing in:", error);
+          });
+    }
+    
     const db = firebase.firestore();
     console.log("Firebase and Firestore initialized:", db);
+    
 
     // Global Variables
     let participantNumber = null;
