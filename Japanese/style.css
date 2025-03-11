@@ -243,6 +243,91 @@ iframe {
     background-color: #808080;
 }
 
+/* Style for Quiz Buttons */
+.quiz-button {
+    background-color: #ff8c00; /* Dark Orange */
+    color: white;
+    font-size: 16px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* 🔹 Group A - Green */
+#learn-group-1 {
+    background-color: #2E8B57; /* Dark Green */
+}
+
+#learn-group-1:hover {
+    background-color: #276848;
+}
+
+#quiz-group-1 {
+    background-color: #66CDAA; /* Light Green */
+}
+
+#quiz-group-1:hover {
+    background-color: #57b79b;
+}
+
+/* 🔹 Group B - Blue */
+#learn-group-2 {
+    background-color: #4169E1; /* Dark Blue */
+}
+
+#learn-group-2:hover {
+    background-color: #3759c1;
+}
+
+#quiz-group-2 {
+    background-color: #87CEEB; /* Light Blue */
+}
+
+#quiz-group-2:hover {
+    background-color: #74b8d6;
+}
+
+/* 🔹 Group C - Orange */
+#learn-group-3 {
+    background-color: #D2691E; /* Dark Orange */
+}
+
+#learn-group-3:hover {
+    background-color: #b85a1a;
+}
+
+#quiz-group-3 {
+    background-color: #FFA07A; /* Light Orange */
+}
+
+#quiz-group-3:hover {
+    background-color: #e0916d;
+}
+
+/* 🔹 Group D - Purple */
+#learn-group-4 {
+    background-color: #8A2BE2; /* Dark Purple */
+}
+
+#learn-group-4:hover {
+    background-color: #7525c4;
+}
+
+#quiz-group-4 {
+    background-color: #BA55D3; /* Light Purple */
+}
+
+#quiz-group-4:hover {
+    background-color: #a04ac1;
+}
+
+
+.quiz-button:hover {
+    background-color: #e67300; /* Slightly darker orange */
+}
+
 
 /* Quiz-specific styling to ensure alignment */
 #quiz-screen {

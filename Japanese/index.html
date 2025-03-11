@@ -43,16 +43,35 @@
 
         <!-- Study Option Screen -->
         <div id="welcome-screen" class="screen hidden">
-            <h1>Choose Your Study Method</h1>
-            <button id="learn-group-1">Learn Group A Words</button>
-            <button id="learn-group-2">Learn Group B Words</button>
-            <button id="learn-group-3">Learn Group C Words</button>
-            <button id="learn-group-4">Learn Group D Words</button>           
-            <button id="meaningRecallButton">Quiz yourself: Word->Meaning (Easier)</button>
-            <button id="formRecallButton">Quiz yourself: Meaning->Word (Harder)</button>
+            <h1>Learn and Review Each Group of Words</h1>
+
+            <!-- 🔹 Group A -->
+            <div class="group-container">
+                <button id="learn-group-1">Learn Group A Words</button>
+                <button id="quiz-group-1">Group A Quiz</button>
+            </div>
+
+            <!-- 🔹 Group B -->
+            <div class="group-container">
+                <button id="learn-group-2">Learn Group B Words</button>
+                <button id="quiz-group-2">Group B Quiz</button>
+            </div>
+
+            <!-- 🔹 Group C -->
+            <div class="group-container">
+                <button id="learn-group-3">Learn Group C Words</button>
+                <button id="quiz-group-3">Group C Quiz</button>
+            </div>
+
+            <!-- 🔹 Group D -->
+            <div class="group-container">
+                <button id="learn-group-4">Learn Group D Words</button>
+                <button id="quiz-group-4">Group D Quiz</button>
+            </div>
+
             <button id="finish" class="return-button">Finish Studying</button>
-            <p id="progress">0 / 48 words learned</p>
         </div>
+
 
         <!-- Learning New Words Screen -->
         <div id="learning-screen" class="screen hidden">
@@ -96,7 +115,7 @@
         <div id="quiz-screen" class="screen hidden">
             <h1 id="quiz-header"></h1>
             <div id="prompt"></div>
-            <div id="choices" class="hidden">
+            <div id="choices">
                 <!-- Buttons for multiple choice answers will be dynamically generated -->
             </div>
             <button id="quiz-return-button" class="return-button">Return to Welcome Screen</button>
