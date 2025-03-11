@@ -165,40 +165,61 @@ iframe {
 
 .button-container {
     display: flex; /* Use flexbox for alignment */
-    justify-content: center; /* Center the buttons horizontally */
-    align-items: center; /* Align the buttons vertically */
-    gap: 20px; /* Add space between the buttons */
+    justify-content: center; /* Center buttons horizontally */
+    align-items: center; /* Align buttons vertically */
+    gap: 15px; /* Space between buttons */
     margin-top: 20px; /* Add spacing above the buttons */
 }
 
-.audio-button, .next-button {
-    background-color: green; /* Default color (green for Listen, will override for Next Word) */
-    color: white; /* White text */
-    border: none; /* Remove borders */
-    padding: 10px 20px; /* Adjust padding for consistent size */
-    font-size: 18px; /* Text size */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    display: flex; /* Use flexbox for icon and text alignment */
-    align-items: center; /* Center icon and text vertically */
-    justify-content: center; /* Center content */
-    gap: 10px; /* Space between icon and text */
-    transition: background-color 0.3s ease; /* Smooth hover effect */
-    width: 150px; /* Set a fixed width for consistent size */
-    height: 50px; /* Set a fixed height for consistent size */
+/* Styling for all buttons in the container */
+.audio-button, .show-definition-button, .next-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 150px; /* Ensures buttons have the same width */
+    height: 50px; /* Ensures buttons have the same height */
 }
 
-.audio-button:hover {
-    background-color: darkgreen; /* Darker green on hover */
+/* Colors */
+.audio-button {
+    background-color: green;
+    color: white;
+}
+
+.show-definition-button {
+    background-color: blue;
+    color: white;
 }
 
 .next-button {
-    background-color: purple; /* Purple for Next Word button */
+    background-color: purple;
+    color: white;
+}
+
+/* Hover Effects */
+.audio-button:hover {
+    background-color: darkgreen;
+}
+
+.show-definition-button:hover {
+    background-color: darkblue;
 }
 
 .next-button:hover {
-    background-color: darkviolet; /* Darker purple on hover */
+    background-color: darkviolet;
 }
+
+/* Hide elements initially */
+.hidden {
+    display: none;
+}
+
 
 
 .audio-icon {

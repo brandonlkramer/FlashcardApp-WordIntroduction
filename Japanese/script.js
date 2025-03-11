@@ -330,20 +330,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("show-definition").addEventListener("click", () => {
-        // Reveal definition with part of speech
+        // Reveal part of speech next to the word
+        document.querySelector(".part-of-speech").classList.remove("hidden");
+    
+        // Reveal definition on the next line
         const definitionLine = document.getElementById("definition-line");
-        definitionLine.innerHTML = `<strong>${definitionLine.dataset.partOfSpeech}:</strong> ${definitionLine.dataset.definition}`;
+        definitionLine.innerHTML = definitionLine.dataset.definition;
         definitionLine.classList.remove("hidden");
     
-        // Reveal example sentence
+        // Reveal example sentence on the final line
         const exampleLine = document.getElementById("example-line");
         exampleLine.innerHTML = exampleLine.dataset.example;
         exampleLine.classList.remove("hidden");
     
-        // Swap the "Show Definition" button with "Next Word"
+        // Hide Show Definition button, Show Next Word button
         document.getElementById("show-definition").classList.add("hidden");
         document.getElementById("next-word").classList.remove("hidden");
     });
+    
+    
     
     
     
@@ -597,11 +602,10 @@ function loadLearningWord() {
     const showDefinitionButton = document.getElementById("show-definition");
     const nextWordButton = document.getElementById("next-word");
 
-    // Initially show only the word
-    wordLine.innerHTML = `<span class="word">${word.word}</span>`;
+    // Initially show only the word with part of speech (in italics, hidden)
+    wordLine.innerHTML = `<span class="word">${word.word}</span> <span class="part-of-speech hidden"><em>(${word.partOfSpeech})</em></span>`;
 
     // Store additional details in dataset attributes
-    definitionLine.dataset.partOfSpeech = `[${word.partOfSpeech}]`;
     definitionLine.dataset.definition = word.definition;
     exampleLine.dataset.example = `<strong>Example:</strong> ${word.example}`;
 
@@ -613,6 +617,7 @@ function loadLearningWord() {
     showDefinitionButton.classList.remove("hidden");
     nextWordButton.classList.add("hidden");
 }
+
 
 
 
