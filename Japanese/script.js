@@ -53,9 +53,137 @@ document.addEventListener("DOMContentLoaded", () => {
     const participantInput = document.getElementById("participant-number");
     const submitParticipantButton = document.getElementById("submit-participant-number");
     const understandButton = document.getElementById("understand-button");
+    console.log("DOM fully loaded. Attaching event listeners...");
 
+    const learnGroup1 = document.getElementById("learn-group-1");
+    const learnGroup2 = document.getElementById("learn-group-2");
+    const learnGroup3 = document.getElementById("learn-group-3");
+    const learnGroup4 = document.getElementById("learn-group-4");
+
+        if (!learnGroup1 || !learnGroup2 || !learnGroup3 || !learnGroup4) {
+            console.error("One or more buttons are missing in the DOM.");
+        } else {
+            learnGroup1.addEventListener("click", () => startLearningGroup(1));
+            learnGroup2.addEventListener("click", () => startLearningGroup(2));
+            learnGroup3.addEventListener("click", () => startLearningGroup(3));
+            learnGroup4.addEventListener("click", () => startLearningGroup(4));
+    
+            console.log("Event listeners attached to Learn Group buttons.");
+        }
+    
+    // 🔍 Check if all required elements exist
+    const checkElements = [
+        "next-word",
+        "play-word",
+        "show-definition",
+        "review-next-word"
+    ];
+
+    checkElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) {
+            console.error(`🚨 Error: Element with ID '${id}' not found in the DOM.`);
+        } else {
+            console.log(`✅ Found element: ${id}`);
+        }
+    });
+
+    const nextWordButton = document.getElementById("next-word");
+    if (nextWordButton) {
+        nextWordButton.addEventListener("click", () => {
+            console.log("📢 Next Word button clicked");
+            learningCurrentIndex++; // Move to next word
+            loadLearningWord();
+        });
+    } else {
+        console.error("🚨 Error: Next Word button not found!");
+    }
+
+    const playWordButton = document.getElementById("play-word");
+    if (playWordButton) {
+        playWordButton.addEventListener("click", () => {
+            console.log("📢 Play Word button clicked");
+
+            if (!newWordsGroup[learningCurrentIndex]) {
+                console.error("🚨 Error: No word found to play audio for.");
+                return;
+            }
+
+            const word = newWordsGroup[learningCurrentIndex].word;
+            const audioPath = `../audio/${word}.mp3`;
+
+            const audio = new Audio(audioPath);
+            audio.play()
+                .then(() => {
+                    console.log(`🎵 Playing audio for: ${word}`);
+                })
+                .catch((error) => {
+                    console.error("🚨 Error playing audio:", error);
+                    alert(`Audio file not found for "${word}".`);
+                });
+        });
+    } else {
+        console.error("🚨 Error: Play Word button not found!");
+    }
+
+    const showDefinitionButton = document.getElementById("show-definition");
+    if (showDefinitionButton) {
+        showDefinitionButton.addEventListener("click", () => {
+            console.log("📢 Show Definition button clicked");
+
+            const definitionLine = document.getElementById("definition-line");
+            const exampleLine = document.getElementById("example-line");
+            const partOfSpeech = document.querySelector(".part-of-speech"); // Select part of speech element
+            const nextWordButton = document.getElementById("next-word");
+
+            if (definitionLine && definitionLine.dataset.definition) {
+                definitionLine.innerHTML = `<strong>Definition:</strong> ${definitionLine.dataset.definition}`;
+                definitionLine.classList.remove("hidden");
+            } else {
+                console.error("🚨 Error: Definition line not found or not set!");
+            }
+
+            if (exampleLine && exampleLine.dataset.example) {
+                // Remove "Example: " if it already exists in the dataset
+                let exampleText = exampleLine.dataset.example.replace(/^Example:\s*/i, "");
+                exampleLine.innerHTML = `${exampleText}`;
+                exampleLine.classList.remove("hidden");
+            } else {
+                console.error("🚨 Error: Example line not found or not set!");
+            }
+
+            if (partOfSpeech) {
+                partOfSpeech.classList.remove("hidden"); // Show part of speech
+            }
+
+            showDefinitionButton.classList.add("hidden"); // Hide "Show Definition" button
+            if (nextWordButton) {
+                nextWordButton.classList.remove("hidden"); // Show "Next Word" button
+            }
+        });
+    } else {
+        console.error("🚨 Error: Show Definition button not found!");
+    }
 
     
+    const returnButton = document.getElementById("learning-return-button");
+    if (returnButton) {
+        returnButton.addEventListener("click", () => {
+            console.log("📢 Return to Welcome Screen button clicked");
+
+            // Reset necessary variables
+            studyMode = "meaningRecall";
+            learningCurrentIndex = 0;
+
+            // Switch back to the welcome screen
+            switchToScreen(document.getElementById("welcome-screen"));
+        });
+    } else {
+        console.error("🚨 Error: Return to Welcome Screen button not found!");
+    }
+
+
+
     // Stop the video when switching screens
     function stopYouTubeVideo() {
         if (player && typeof player.stopVideo === 'function') {
@@ -97,22 +225,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to switch between screens
     function switchToScreen(screen) {
+        // Log which screen is being switched to
+        console.log("Switching to screen:", screen.id);
+
         // Stop the YouTube video if leaving the explainer screen
         const currentScreen = document.querySelector('.screen.active');
         if (currentScreen && currentScreen.id === 'explainer-screen' && player) {
             stopYouTubeVideo();
         }
-    
+
         // Hide all screens
         document.querySelectorAll('.screen').forEach((s) => {
             s.classList.add('hidden');
             s.classList.remove('active');
         });
-    
+
         // Show the specified screen
         screen.classList.remove('hidden');
         screen.classList.add('active');
     }
+
     
     
     
@@ -123,30 +255,54 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Variables
     const learningWordsPool = [
-        { word: "DOG", partOfSpeech: "Noun (countable) pl. dogs", definition: "いぬ", example: "The <u>dog</u> wagged its tail happily." },
-        { word: "HAPPY", partOfSpeech: "Adjective -", definition: "幸せな", example: "She felt <u>happy</u> after finishing her work." },
-        { word: "HOUSE", partOfSpeech: "Noun (countable) pl. houses", definition: "家", example: "They bought a new <u>house</u> in the countryside." },
-        { word: "DRINK", partOfSpeech: "Verb drinks, drinking, drank, drunk", definition: "飲む", example: "I always <u>drink</u> coffee in the morning." },
-        { word: "CAR", partOfSpeech: "Noun (countable) pl. cars", definition: "車", example: "The <u>car</u> stopped at the red light." },
-        { word: "EAT", partOfSpeech: "Verb eats, eating, ate, eaten", definition: "食べる", example: "I <u>ate</u> sushi for dinner last night." },
-        { word: "WATER", partOfSpeech: "Noun (uncountable) -", definition: "水", example: "Please drink more <u>water</u> to stay hydrated." },
-        { word: "SMILE", partOfSpeech: "Verb smiles, smiling, smiled", definition: "笑う", example: "The baby <u>smiled</u> at her mother." },
-        { word: "TREE", partOfSpeech: "Noun (countable) pl. trees", definition: "木", example: "He climbed the <u>tree</u> to pick some apples." },
-        { word: "SLEEP", partOfSpeech: "Verb sleeps, sleeping, slept", definition: "眠る", example: "He <u>slept</u> soundly after a long day." },
-        { word: "BOOK", partOfSpeech: "Noun (countable) pl. books", definition: "本", example: "She borrowed a <u>book</u> from the library." },
-        { word: "LAUGH", partOfSpeech: "Verb laughs, laughing, laughed", definition: "笑う", example: "They <u>laughed</u> at the funny joke." },
-        { word: "CHAIR", partOfSpeech: "Noun (countable) pl. chairs", definition: "椅子", example: "He sat on the <u>chair</u> by the window." },
-        { word: "DANCE", partOfSpeech: "Verb dances, dancing, danced", definition: "踊る", example: "She <u>danced</u> gracefully at the party." },
-        { word: "SUN", partOfSpeech: "Noun (singular) -", definition: "太陽", example: "The <u>sun</u> set over the horizon." },
-        { word: "WORK", partOfSpeech: "Verb works, working, worked", definition: "働く", example: "He <u>works</u> hard every day at the office." },
-        { word: "FOOD", partOfSpeech: "Noun (uncountable) -", definition: "食べ物", example: "Japanese <u>food</u> is delicious." },
-        { word: "CLOUD", partOfSpeech: "Noun (countable) pl. clouds", definition: "雲", example: "A <u>cloud</u> covered the sun briefly." },
-        { word: "WRITE", partOfSpeech: "Verb writes, writing, wrote, written", definition: "書く", example: "She <u>wrote</u> a letter to her friend." },
-        { word: "FISH", partOfSpeech: "Noun (countable) pl. fish", definition: "魚", example: "The <u>fish</u> swam quickly in the river." },
-        { word: "APPLE", partOfSpeech: "Noun (countable) pl. apples", definition: "りんご", example: "He ate an <u>apple</u> for a snack." },
-        { word: "STUDY", partOfSpeech: "Verb studies, studying, studied", definition: "勉強する", example: "I <u>study</u> English every evening." },
-        { word: "ROAD", partOfSpeech: "Noun (countable) pl. roads", definition: "道", example: "The <u>road</u> was empty in the early morning." },
-        { word: "SING", partOfSpeech: "Verb sings, singing, sang, sung", definition: "歌う", example: "She loves to <u>sing</u> at karaoke with friends." }
+        { learnGroup: "1", word: "advern", partOfSpeech: "可算名詞", definition: "建設業で使用される多目的のこぎり。", example: "I am building a deck this weekend; can I borrow your <u>advern</u>, please?" },
+        { learnGroup: "2", word: "beacos", partOfSpeech: "不可算名詞", definition: "副鼻腔炎。", example: "Use this nasal spray for two weeks to reduce the <u>beacos</u>." },
+        { learnGroup: "1", word: "bockle", partOfSpeech: "他動詞", definition: "さまざまな建設作業のための支え角度を測定または確認すること。", example: "The contractor <u>bockled</u> the ground floor area before installing the kitchen bench." },
+        { learnGroup: "1", word: "emback", partOfSpeech: "可算名詞", definition: "玄関やベランダを覆い、雨よけの役割を果たす屋根。(風除室)", example: "You couldn’t wish for a better house: everything was thought through to the finest detail. Even the <u>emback</u> was designed to keep you dry on a rainy day." },
+        { learnGroup: "2", word: "evotic", partOfSpeech: "形容詞", definition: "目まいや極度の脱力感を感じる状態を表す言葉。全身麻酔から目覚める患者の状態を説明する際によく使われる。(朦朧)", example: "You may see her now, but only for a few minutes; the operation was successful, but she is still extremely <u>evotic</u>." },
+        { learnGroup: "2", word: "slobes", partOfSpeech: "可算名詞", definition: "遠視を矯正する特殊なレンズ。(コンタクトレンズ)", example: "You will have to wear <u>slobes</u> when driving or reading, to correct your eyesight problem." },
+        { learnGroup: "2", word: "injent", partOfSpeech: "他動詞", definition: "患者の病気の種類を診断するために、問診、検査、医療テストなどを用いること。(診断)", example: "Since my family doctor could not <u>injent</u> the problem, she referred me to a specialist." },
+        { learnGroup: "2", word: "wockey", partOfSpeech: "可算名詞", definition: "歯の上部を覆う人工の被せ物。(クラウン)", example: "As a child, I damaged my front tooth playing football, but the dentist did such a good job with my <u>wockey</u> that no one ever noticed it." },
+        { learnGroup: "2", word: "jeking", partOfSpeech: "形容詞", definition: "一時的に痛みを感じにくくなる状態を表す言葉。(鎮痛)", example: "I can recommend a <u>jeking</u> treatment to relieve the pain." },
+        { learnGroup: "1", word: "recibe", partOfSpeech: "他動詞", definition: "明確に区切られた範囲で、スコップや掘削機を使って土や砂礫を取り除くこと。(発掘)", example: "The workers will be here tomorrow to <u>recibe</u> the marked area, and next week we can start on the foundation." },
+        { learnGroup: "1", word: "totate", partOfSpeech: "他動詞", definition: "ガラスに光を反射する金属または特殊なコーティングを施し、不透明にする処理。(ガラスフィルム加工)", example: "In the embassy building all windows facing the street were <u>totated</u> for security reasons." },
+        { learnGroup: "2", word: "perial", partOfSpeech: "可算名詞", definition: "長期的な人工呼吸が必要な場合に使用される医療機器。(人工呼吸器)", example: "After the accident the patient was put on a <u>perial</u> because one of his lungs collapsed and he could not breathe on his own." },
+        { learnGroup: "1", word: "surmit", partOfSpeech: "可算名詞", definition: "クローラーまたは大きな車輪を持ち、土砂を移動させるための大型ショベルを備えた建設車両。(ブルドーザー)", example: "The old motel on the corner of our street had been finally torn down, and <u>surmits</u> were working hard and fast to clear the area where the new hotel was going to rise." },
+        { learnGroup: "1", word: "tainor", partOfSpeech: "可算名詞", definition: "建築士や熟練した作業員をさまざまな方法で補助する未熟な労働者。(見習い)", example: "I will be working as a <u>tainor</u> on a building site this summer to help me save for my holiday in South America next year." },
+        { learnGroup: "1", word: "banity", partOfSpeech: "可算名詞", definition: "壁や天井に施された模様やデザイン。(壁装飾)", example: "Mother decided to have a <u>banity</u> made on the feature wall in the dining room. She invited an interior designer who brought a selection of stencils for us to choose from." },
+        { learnGroup: "2", word: "wateny", partOfSpeech: "不可算名詞", definition: "花粉によって引き起こされる強い過敏反応。典型的な症状として、くしゃみ、かゆみ、腫れがある。(花粉症)", example: "We are moving back to the city this week, where the risk of a <u>wateny</u> attack is much lower." },
+        { learnGroup: "1", word: "abstair", partOfSpeech: "可算名詞", definition: "建設足場の手すりに取り付けられた階段構造で、作業員が上り下りするためのもの。(脚立)", example: "We need to position two <u>abstairs</u> at the western side of the construction site because this is where most of the work will be done today." },
+        { learnGroup: "1", word: "animote", partOfSpeech: "可算名詞", definition: "電気を一定方向に伝送する金属または人工の導体。(電線)", example: "You need to get a registered electrician to do this wiring job; you won’t know how to connect the <u>animotes</u>." },
+        { learnGroup: "2", word: "aportle", partOfSpeech: "可算名詞", definition: "医薬品を臓器に直接注射するための注射器。(注射器)", example: "Today we will practice using <u>aportle</u> for administering atropine injections into the heart." },
+        { learnGroup: "2", word: "circhit", partOfSpeech: "可算名詞", definition: "傷口を感染やさらなる損傷から守るために使用される滅菌カバー。(包帯)", example: "The cut doesn’t look too bad, but you must put a <u>circhit</u> on it to make sure it doesn’t get infected." },
+        { learnGroup: "2", word: "custony", partOfSpeech: "不可算名詞", definition: "現実との関係が著しく歪む、または完全に失われる深刻な精神障害。(精神疾患)", example: "With such a severe form of <u>custony</u>, it would be dangerous for her to remain living in the community." },
+        { learnGroup: "2", word: "entrave", partOfSpeech: "他動詞", definition: "医薬品、ワクチン、または液体を静脈内に投与すること。(静脈注射)", example: "We will <u>entrave</u> this medication for three days after surgery, and then you will have to take it orally for one month." },
+        { learnGroup: "1", word: "erramic", partOfSpeech: "可算名詞", definition: "庭や歩道で使われる敷石や砂利などの舗装材。(砂利)", example: "I am running out of <u>erramic</u>. We will have to stop for the day and finish paving this walkway early tomorrow." },
+        { learnGroup: "1", word: "pluency", partOfSpeech: "可算名詞", definition: "建物内の温度を一定に保つ装置。(温度調整装置)", example: "This refresher course covers new <u>pluency</u> requirements for apartment blocks, and is recommended for architects and construction site managers." },
+        { learnGroup: "3", word: "gatebay", partOfSpeech: "可算名詞", definition: "主に森や山岳地帯に見られる木造の簡易な建物。一時的な避難所としても使用される。(小屋)", example: "I know that you are tired, but we need to speed up if we want to reach the <u>gatebay</u> before dark." },
+        { learnGroup: "3", word: "imigate", partOfSpeech: "他動詞", definition: "詰まった排水管や配管を解消するために、吸引力を用いること。(配管掃除)", example: "The water drain in the bath is completely blocked; I have taken a look at it, but we won’t be able to <u>imigate</u> it without proper equipment." },
+        { learnGroup: "4", word: "mercusy", partOfSpeech: "不可算名詞", definition: "消化管や気道などの多くの体腔を覆う粘液状の液体。(粘液)", example: "Continue using the drops I gave you until <u>mercusy</u> emissions stop." },
+        { learnGroup: "4", word: "proster", partOfSpeech: "可算名詞", definition: "腰、臀部、大腿部を含む体の部分。(下半身)", example: "This set of exercises focuses on the <u>proster</u> area." },
+        { learnGroup: "4", word: "regrain", partOfSpeech: "可算名詞", definition: "動脈や静脈を部分的または完全に塞ぎ、心筋梗塞や脳卒中を引き起こす血栓の一種。(血栓)", example: "The patient is in cardiology; he was delivered by an ambulance at 3 AM, but the <u>regrain</u> had most likely occurred about 2 hours prior to this." },
+        { learnGroup: "3", word: "scother", partOfSpeech: "可算名詞", definition: "ナットやボルトを締めたり曲げたりするための工具。(レンチ)", example: "To disassemble the ladder, use a 3/4 inch <u>scother</u> to loosen the locking nut." },
+        { learnGroup: "3", word: "prolley", partOfSpeech: "可算名詞", definition: "建築や橋梁の主要な支持要素として使われる頑丈な鉄骨。(梁)", example: "It won’t be possible to put a skylight exactly where you want it, because one of the <u>prolleys</u> goes through this area." },
+        { learnGroup: "4", word: "utilisk", partOfSpeech: "可算名詞", definition: "外科手術で切開部を広げるために使用される器具。(開創器)", example: "The senior nurse was holding a <u>utilisk</u> ready to hand it over to the surgeon once the incision was made." },
+        { learnGroup: "4", word: "imputate", partOfSpeech: "他動詞", definition: "医薬品として使用するために植物やハーブを準備すること。(薬草処理)", example: "She knew ways of <u>imputating</u> most obscure herbs to bring out their medicinal qualities." },
+        { learnGroup: "4", word: "antidoth", partOfSpeech: "可算名詞", definition: "肺機能障害やさまざまな肺疾患を治療するための淡黄色の天然治療薬。(肺用漢方薬)", example: "I heard that conventional treatments for lung problems have a number of side effects and decided to try an <u>antidoth</u> first." },
+        { learnGroup: "3", word: "bankrust", partOfSpeech: "可算名詞", definition: "床材、屋根材、またはタイルを敷く専門職。(屋根職人)", example: "My father was a <u>bankrust</u> and passed on his trade secrets to me. I worked as his apprentice for 3 years before starting my own business." },
+        { learnGroup: "4", word: "bracenet", partOfSpeech: "可算名詞", definition: "捻る、引っ張る、または過度に伸ばすことで生じる激しい腱や靭帯の損傷。(捻挫)", example: "We will need a stretcher here. I am not sure at this stage if it is a fracture or only a <u>bracenet</u>, but it is clearly too painful for him to walk." },
+        { learnGroup: "3", word: "briening", partOfSpeech: "可算名詞", definition: "玄関の下部に設置される木や石の横木で、支えとして機能するもの。(敷居)", example: "These two cans of paint should be enough to paint all <u>brienings</u> and doorframes." },
+        { learnGroup: "3", word: "carnivat", partOfSpeech: "可算名詞", definition: "建設業で洗浄や材料の混合に使用される浅い丸型容器。(バケツ)", example: "The apprentice prepared the building mix and put it in <u>carnivats</u> for the bricklayers." },
+        { learnGroup: "4", word: "colonias", partOfSpeech: "不可算名詞", definition: "皮膚やその下の組織に炎症が起こり、傷ついたり、あとが残ることがある病気。主な症状は皮膚の赤みとかゆみ。(皮膚炎)", example: "<u>Colonias</u> must be treated in the early stages of the disease to avoid scarring." },
+        { learnGroup: "3", word: "discrent", partOfSpeech: "不可算名詞", definition: "厚みがあり滑らかな床材または塗装。(床材)", example: "We used <u>discrent</u> when we renovated our lounge last year because it makes cleaning really easy and it looks great." },
+        { learnGroup: "3", word: "dragment", partOfSpeech: "可算名詞", definition: "人や重い荷物を持ち上げたり降ろしたりする設備。(エレベーター)", example: "We will need a <u>dragment</u> to lift the concrete slabs up to the top level." },
+        { learnGroup: "4", word: "teometry", partOfSpeech: "不可算名詞", definition: "内臓の機能や疾患を研究する医学の一分野。(内科学)", example: "Many medical researchers who work in the field of <u>teometry</u> recommend bowel irrigation as a preventative measure." },
+        { learnGroup: "3", word: "infecent", partOfSpeech: "不可算名詞", definition: "砂、セメント、水を混ぜて作る堅牢な建築材料。(コンクリート)", example: "You must use <u>infecent</u> straight out of a rotating mixing drum." },
+        { learnGroup: "3", word: "maxidise", partOfSpeech: "他動詞", definition: "壁や天井を塗装またはコーティングし、硬化させること。(塗装)", example: "When <u>maxidising</u>, make sure that all the gaps in a wall or ceiling are covered with the filler." },
+        { learnGroup: "4", word: "obsolate", partOfSpeech: "他動詞", definition: "外科的に除去すること。(切除)", example: "“Nurse, prepare the scalpel”, said the surgeon, “I will now <u>obsolate</u> the tumour.”" },
+        { learnGroup: "4", word: "treacher", partOfSpeech: "可算名詞", definition: "妊娠、出産、母体ケアを専門とする医師。(産婦人科医)", example: "As a child, she was greatly affected by the death of her baby sister. It was back then that she decided to become a <u>treacher</u>." },
+        { learnGroup: "3", word: "rebailer", partOfSpeech: "可算名詞", definition: "一般家庭や企業のエネルギー消費量を測定・記録する装置。(電力計)", example: "I think our <u>rebailer</u> shows incorrect readings. We haven’t used our electrical appliances much this month, but the bill is really high." },
+        { learnGroup: "4", word: "telerant", partOfSpeech: "可算名詞", definition: "医療分野で訓練を受けたが、通常は医師ではない救急対応者。(救急救命士)", example: "All <u>telerants</u> should be in the hospital lobby in five minutes." }
     ];
     let studyMode = "meaningRecall"; // Default study mode
     let remainingLearningWords= [...learningWordsPool];
@@ -304,24 +460,37 @@ document.addEventListener("DOMContentLoaded", () => {
     
     
 
-    document.getElementById("review-learned-words").addEventListener("click", () => {
-        console.log("Review Learned Words button clicked");
-        
-        // Check if there are any learned words
-        if (learningCompletedWords.length === 0) {
-            alert("No words to review. Please learn some words first!");
+    // Function to start learning a specific group
+    function startLearningGroup(groupNumber) {
+        console.log(`Learn Group ${groupNumber} button clicked`);
+    
+        // Filter words based on the learnGroup number
+        newWordsGroup = learningWordsPool.filter(word => word.learnGroup === String(groupNumber));
+    
+        // Check if there are words to learn in the selected group
+        if (newWordsGroup.length === 0) {
+            alert("No words available for this group.");
             return;
         }
     
-        // Set up review mode with learned words
-        reviewPendingWords = [...learningCompletedWords];
-        currentReviewWord = null; // Reset the current review word
-        reviewCurrentIndex = 0; // Reset the current index
-        studyMode = "reviewLearned"; // Set study mode
-        switchToScreen(document.getElementById("review-screen"));
-        loadReviewWord();
-    });
+        // Reset learning progress for the group
+        learningCurrentIndex = 0;
+        studyMode = "learnNewWords";
     
+        // Switch to learning screen and ensure it's visible
+        const learningScreen = document.getElementById("learning-screen");
+        if (!learningScreen) {
+            console.error("Error: Learning screen not found.");
+            return;
+        }
+    
+        switchToScreen(learningScreen);
+        loadLearningWord();
+    }
+    
+
+
+
     
 
     document.getElementById("formRecallButton").addEventListener("click", () => {
@@ -575,21 +744,14 @@ function updateLearningProgress() {
 
 
 function loadLearningWord() {
-    if (learningCurrentIndex >= learningWordsPool.length) {
-        alert("You have completed all the words available for learning!");
+    if (learningCurrentIndex >= newWordsGroup.length) {
+        alert("You have completed all words in this group!");
         updateLearningProgress();
         switchToScreen(document.getElementById("welcome-screen"));
         return;
     }
 
-    if (learningCurrentIndex >= newWordsGroup[0].startIndex + 12) {
-        alert("You have completed this session of 12 words. Please quiz yourself or review!");
-        updateLearningProgress();
-        switchToScreen(document.getElementById("welcome-screen"));
-        return;
-    }
-
-    const word = learningWordsPool[learningCurrentIndex];
+    const word = newWordsGroup[learningCurrentIndex];
     if (!word) {
         console.error("Word not found for index:", learningCurrentIndex);
         return;
@@ -602,7 +764,7 @@ function loadLearningWord() {
     const showDefinitionButton = document.getElementById("show-definition");
     const nextWordButton = document.getElementById("next-word");
 
-    // Initially show only the word with part of speech (in italics, hidden)
+    // Initially show only the word with part of speech (hidden)
     wordLine.innerHTML = `<span class="word">${word.word}</span> <span class="part-of-speech hidden"><em>(${word.partOfSpeech})</em></span>`;
 
     // Store additional details in dataset attributes
