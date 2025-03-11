@@ -329,6 +329,13 @@ document.addEventListener("DOMContentLoaded", () => {
         startQuiz("formRecall");
     });
 
+    document.getElementById("show-definition").addEventListener("click", () => {
+        document.getElementById("definition-line").classList.remove("hidden");
+        document.getElementById("example-line").classList.remove("hidden");
+        document.getElementById("show-definition").classList.add("hidden"); // Hide the button after clicking
+    });
+    
+
     document.getElementById("play-word").addEventListener("click", () => {
         // Ensure a word is currently being displayed
         if (!learningWordsPool[learningCurrentIndex]) {
@@ -578,8 +585,23 @@ function loadLearningWord() {
         <span class="word">${word.word}</span> 
         <span class="part-of-speech">[${word.partOfSpeech}]</span>
     `;
-    document.getElementById("definition-line").textContent = word.definition;
-    document.getElementById("example-line").innerHTML = `<strong>Example:</strong> ${word.example}`;
+    const definitionLine = document.getElementById("definition-line");
+    const exampleLine = document.getElementById("example-line");
+    const showDefinitionButton = document.getElementById("show-definition");
+    
+    // Initially show only the word
+    document.getElementById("word-line").innerHTML = `
+        <span class="word">${word.word}</span> 
+        <span class="part-of-speech">[${word.partOfSpeech}]</span>
+    `;
+    
+    // Hide definition and example initially
+    definitionLine.textContent = word.definition;
+    exampleLine.innerHTML = `<strong>Example:</strong> ${word.example}`;
+    definitionLine.classList.add("hidden");
+    exampleLine.classList.add("hidden");
+    showDefinitionButton.classList.remove("hidden"); // Ensure the button is visible
+    
 }
 
 
