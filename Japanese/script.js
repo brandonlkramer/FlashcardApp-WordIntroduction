@@ -71,6 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Event listeners attached to Learn Group buttons.");
         }
     
+    let studyFinished = false; // ✅ Global flag
+
+
+    document.getElementById("finish").addEventListener("click", () => {
+        console.log("Finish button clicked");
+        finishStudy();
+    });
 
     document.getElementById("quiz-group-1").addEventListener("click", () => startGroupQuiz(1));
     document.getElementById("quiz-group-2").addEventListener("click", () => startGroupQuiz(2));
@@ -350,6 +357,7 @@ document.getElementById("play-word").addEventListener("click", () => {
     const promptDiv = document.getElementById("prompt");
     const answerDiv = document.getElementById("answer");
 
+
      // Event Listener for manual participant number submission
     
      document.getElementById("next-word").addEventListener("click", () => {
@@ -508,12 +516,7 @@ document.getElementById("play-word").addEventListener("click", () => {
 
 
 
-    
-
-    document.getElementById("formRecallButton").addEventListener("click", () => {
-        console.log("Review Words button clicked");
-        startQuiz("formRecall");
-    });
+ 
 
     document.getElementById("show-definition").addEventListener("click", () => {
         // Reveal part of speech next to the word
@@ -539,11 +542,6 @@ document.getElementById("play-word").addEventListener("click", () => {
     document.getElementById("meaningRecallButton").addEventListener("click", () => {
         console.log("Review Meanings button clicked");
         startQuiz("meaningRecall");
-    });
-
-    document.getElementById("finish").addEventListener("click", () => {
-        console.log("Finish button clicked");
-        finishStudy();
     });
 
 
@@ -1112,19 +1110,44 @@ document.getElementById("quiz-return-button").addEventListener("click", () => {
     }
     
 
-    function finishStudy() {
-        alert("Thank you for studying! You can close this tab now.");
 
-        // Reset screens
-        studyScreen.classList.remove("active");
-        studyScreen.classList.add("hidden");
-        welcomeScreen.classList.remove("hidden");
-        welcomeScreen.classList.add("active");
+    function finishStudy() {
+        if (studyFinished) return; // ✅ Prevent duplicate execution
+        studyFinished = true; // ✅ Mark it as executed
     
-        // Reset data
-        remainingLearningWords= [...learningWordsPool];
+        console.log("🎯 finishStudy() called! Resetting study session...");
+    
+        alert("Thank you for studying! You can close this tab now.");
+    
+        // ✅ Save data before finishing
+        saveDataToServer(studyData);
+        studyData = []; // Reset stored study data
+    
+        // ✅ Reset UI
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.add("hidden");
+            screen.classList.remove("active");
+        });
+    
+        // ✅ Show Welcome Screen
+        const welcomeScreen = document.getElementById("welcome-screen");
+        if (welcomeScreen) {
+            welcomeScreen.classList.remove("hidden");
+            welcomeScreen.classList.add("active");
+        } else {
+            console.error("🚨 Error: Welcome screen not found!");
+        }
+    
+        // ✅ Reset Study Variables
+        learningCurrentIndex = 0;
+        remainingLearningWords = [...learningWordsPool];
         currentWord = null;
+        audioPlayCount = 0;
+        window.groupFinishedAlerted = false;
+    
+        console.log("✅ Study session reset successfully.");
     }
+    
     
     function saveDataToServer(data) {
         const db = firebase.firestore();
