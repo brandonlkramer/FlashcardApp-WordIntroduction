@@ -330,14 +330,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("show-definition").addEventListener("click", () => {
-        // Reveal definition and example
-        document.getElementById("definition-line").classList.remove("hidden");
-        document.getElementById("example-line").classList.remove("hidden");
+        // Reveal definition with part of speech
+        const definitionLine = document.getElementById("definition-line");
+        definitionLine.innerHTML = `<strong>${definitionLine.dataset.partOfSpeech}:</strong> ${definitionLine.dataset.definition}`;
+        definitionLine.classList.remove("hidden");
+    
+        // Reveal example sentence
+        const exampleLine = document.getElementById("example-line");
+        exampleLine.innerHTML = exampleLine.dataset.example;
+        exampleLine.classList.remove("hidden");
     
         // Swap the "Show Definition" button with "Next Word"
         document.getElementById("show-definition").classList.add("hidden");
         document.getElementById("next-word").classList.remove("hidden");
     });
+    
+    
     
     
 
@@ -562,64 +570,50 @@ function updateLearningProgress() {
 
 
 function loadLearningWord() {
-    // Stop if the current index exceeds the total pool length
     if (learningCurrentIndex >= learningWordsPool.length) {
         alert("You have completed all the words available for learning!");
         updateLearningProgress();
-        switchToScreen(document.getElementById("welcome-screen")); // Return to welcome screen
+        switchToScreen(document.getElementById("welcome-screen"));
         return;
     }
 
-    // Stop if 12 words in this session have been learned
     if (learningCurrentIndex >= newWordsGroup[0].startIndex + 12) {
         alert("You have completed this session of 12 words. Please quiz yourself or review!");
         updateLearningProgress();
-        switchToScreen(document.getElementById("welcome-screen")); // Return to welcome screen
+        switchToScreen(document.getElementById("welcome-screen"));
         return;
     }
 
-    // Load the next word for the session
     const word = learningWordsPool[learningCurrentIndex];
     if (!word) {
         console.error("Word not found for index:", learningCurrentIndex);
         return;
     }
 
-    // Get UI elements
+    // Store elements in variables
     const wordLine = document.getElementById("word-line");
     const definitionLine = document.getElementById("definition-line");
     const exampleLine = document.getElementById("example-line");
     const showDefinitionButton = document.getElementById("show-definition");
     const nextWordButton = document.getElementById("next-word");
 
-    // Display only the word at first (no part of speech)
+    // Initially show only the word
     wordLine.innerHTML = `<span class="word">${word.word}</span>`;
 
-    // Store definition and example but keep them hidden initially
-    definitionLine.textContent = `${word.partOfSpeech} - ${word.definition}`;
-    exampleLine.innerHTML = `<strong>Example:</strong> ${word.example}`;
+    // Store additional details in dataset attributes
+    definitionLine.dataset.partOfSpeech = `[${word.partOfSpeech}]`;
+    definitionLine.dataset.definition = word.definition;
+    exampleLine.dataset.example = `<strong>Example:</strong> ${word.example}`;
+
+    // Hide the definition and example initially
     definitionLine.classList.add("hidden");
     exampleLine.classList.add("hidden");
 
-    // Show "Show Definition" button instead of "Next Word"
+    // Ensure the "Show Definition" button is visible and "Next Word" is hidden initially
     showDefinitionButton.classList.remove("hidden");
     nextWordButton.classList.add("hidden");
-
-    
-    // Initially show only the word
-    document.getElementById("word-line").innerHTML = `
-        <span class="word">${word.word}</span> 
-        <span class="part-of-speech">[${word.partOfSpeech}]</span>
-    `;
-    
-    // Hide definition and example initially
-    definitionLine.textContent = word.definition;
-    exampleLine.innerHTML = `<strong>Example:</strong> ${word.example}`;
-    definitionLine.classList.add("hidden");
-    exampleLine.classList.add("hidden");
-    showDefinitionButton.classList.remove("hidden"); // Ensure the button is visible
-    
 }
+
 
 
 
