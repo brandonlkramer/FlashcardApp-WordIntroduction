@@ -330,10 +330,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("show-definition").addEventListener("click", () => {
+        // Reveal definition and example
         document.getElementById("definition-line").classList.remove("hidden");
         document.getElementById("example-line").classList.remove("hidden");
-        document.getElementById("show-definition").classList.add("hidden"); // Hide the button after clicking
+    
+        // Swap the "Show Definition" button with "Next Word"
+        document.getElementById("show-definition").classList.add("hidden");
+        document.getElementById("next-word").classList.remove("hidden");
     });
+    
     
 
     document.getElementById("play-word").addEventListener("click", () => {
@@ -580,14 +585,26 @@ function loadLearningWord() {
         return;
     }
 
-    // Update the UI for the current word
-    document.getElementById("word-line").innerHTML = `
-        <span class="word">${word.word}</span> 
-        <span class="part-of-speech">[${word.partOfSpeech}]</span>
-    `;
+    // Get UI elements
+    const wordLine = document.getElementById("word-line");
     const definitionLine = document.getElementById("definition-line");
     const exampleLine = document.getElementById("example-line");
     const showDefinitionButton = document.getElementById("show-definition");
+    const nextWordButton = document.getElementById("next-word");
+
+    // Display only the word at first (no part of speech)
+    wordLine.innerHTML = `<span class="word">${word.word}</span>`;
+
+    // Store definition and example but keep them hidden initially
+    definitionLine.textContent = `${word.partOfSpeech} - ${word.definition}`;
+    exampleLine.innerHTML = `<strong>Example:</strong> ${word.example}`;
+    definitionLine.classList.add("hidden");
+    exampleLine.classList.add("hidden");
+
+    // Show "Show Definition" button instead of "Next Word"
+    showDefinitionButton.classList.remove("hidden");
+    nextWordButton.classList.add("hidden");
+
     
     // Initially show only the word
     document.getElementById("word-line").innerHTML = `
