@@ -129,8 +129,8 @@ document.getElementById("play-word").addEventListener("click", () => {
     }
 
     const word = wordElement.textContent.trim(); // Extract the correct word from UI
-    const audioPath = `../audio/${word.toUpperCase()}.mp3`;
-//    const audioPath = `audio/${word.toUpperCase()}.MP3`;
+//    const audioPath = `../audio/${word.toUpperCase()}.mp3`;
+    const audioPath = `audio/${word.toUpperCase()}.mp3`;
 
 
 
