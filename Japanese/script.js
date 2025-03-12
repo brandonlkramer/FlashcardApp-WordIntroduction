@@ -176,8 +176,8 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("🚨 Error: Next Word button not found!");
     }
 
-// ✅ Fix: Play correct audio and count clicks
-document.getElementById("play-word").addEventListener("click", () => {
+    // ✅ Fix: Play correct audio and count clicks
+    document.getElementById("play-word").addEventListener("click", () => {
     const wordElement = document.querySelector("#word-line .word"); // Get the displayed word
 
     if (!wordElement) {
@@ -201,7 +201,7 @@ document.getElementById("play-word").addEventListener("click", () => {
             console.error("🚨 Error playing audio:", error);
             alert(`Audio file not found for "${word}".`);
         });
-});
+    });
 
 
 
