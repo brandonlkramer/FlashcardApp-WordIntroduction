@@ -20,31 +20,19 @@ async function exportData() {
 
   try {
     const folderPath = './FirestoreData';
-    // Get current date and time in JST
-    const now = new Date();
-    const options = { timeZone: 'Asia/Tokyo', hour12: false };
-    const dateFormatter = new Intl.DateTimeFormat('en-CA', {
-      ...options,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-    const timeFormatter = new Intl.DateTimeFormat('en-CA', {
-      ...options,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-
-    const formattedDate = dateFormatter.format(now); // e.g., "2025-01-11"
-    const formattedTime = timeFormatter.format(now).replace(/:/g, '-'); // e.g., "14-30-45"
-    const timestamp = `${formattedDate}_${formattedTime}`;
-    const filePath = `${folderPath}/exported_data_${timestamp}.csv`;
 
     // Ensure the FirestoreData folder exists
     if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath);
+        fs.mkdirSync(folderPath, { recursive: true });
     }
+
+    // Get current date and time in JST with correct formatting
+    const now = new Date();
+    const formattedDate = now.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    const formattedTime = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // "HH-MM-SS"
+
+    const timestamp = `${formattedDate}_${formattedTime}`;
+    const filePath = `${folderPath}/exported_data_${timestamp}.csv`;
 
     const snapshot = await collectionRef.get();
     if (snapshot.empty) {
